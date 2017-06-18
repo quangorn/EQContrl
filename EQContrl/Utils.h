@@ -24,30 +24,27 @@ inline std::string currentDateTime() {
 	sprintf_s(buf, "[%02d:%02d:%02d.%03d]\t", t.wHour, t.wMinute, t.wSecond, t.wMilliseconds);
 	return buf;
 }
-#ifdef _LOG
-#define LOG(args) \
+
+#define LOG(args)// \
 { \
 	static std::ofstream fout; \
 	fout.open(LOG_FILE, std::ios_base::app); \
 	fout << currentDateTime() << args << std::endl; \
 	fout.close(); \
 }
-#else
-#define LOG(args)
-#endif
 
 #define ENC(args)// \
-//{ \
-//	static std::ofstream fout; \
-//	fout.open(ENC_FILE, std::ios_base::app); \
-//	fout << currentDateTime() << args << std::endl; \
-//	fout.close(); \
-//}
+{ \
+	static std::ofstream fout; \
+	fout.open(ENC_FILE, std::ios_base::app); \
+	fout << currentDateTime() << args << std::endl; \
+	fout.close(); \
+}
 
 #define CDR(args)// \
-//{ \
-//	static std::ofstream fout; \
-//	fout.open(CDR_FILE, std::ios_base::app); \
-//	fout << currentDateTime() << args << std::endl; \
-//	fout.close(); \
-//}
+{ \
+	static std::ofstream fout; \
+	fout.open(CDR_FILE, std::ios_base::app); \
+	fout << args << std::endl; \
+	fout.close(); \
+}

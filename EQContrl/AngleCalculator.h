@@ -22,13 +22,13 @@ public:
 		m_fout.close();*/
 	}
 
-	void CalculateAngle(uint32_t nValueX, uint32_t nValueY);
+	void CalculateAngle(int32_t nValueX, int32_t nValueY);
 
 private:
-	uint32_t m_nMinValueX;
-	uint32_t m_nMaxValueX;
-	uint32_t m_nMinValueY;
-	uint32_t m_nMaxValueY;
+	int32_t m_nMinValueX;
+	int32_t m_nMaxValueX;
+	int32_t m_nMinValueY;
+	int32_t m_nMaxValueY;
 
 	//std::stringstream m_fout;
 };

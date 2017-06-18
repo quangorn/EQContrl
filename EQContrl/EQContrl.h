@@ -12,9 +12,15 @@
 
 #include "Protocol.h"
 
+typedef unsigned long       DWORD;
+
 DWORD Convert(EQ::En_Status nStatus);
 
-EQ::En_Status Connect();
+EQCONTRL_API EQ::En_Status Connect();
+
+EQCONTRL_API EQ::En_Status Disconnect();
+
+EQCONTRL_API EQ::Config GetConfig();
 
 template <typename T>
 EQ::En_Status SendReq(const T& Req);

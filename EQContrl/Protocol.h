@@ -35,6 +35,16 @@ namespace EQ {
 		STS_MOTOR_LIMIT_REACHED,
 	};
 
+	struct AxisConfig {
+		uint16_t m_nMaxSpeed;
+		uint16_t m_nMaxFreq;
+		uint16_t m_nMicrosteps;
+	};
+
+	struct Config {
+		AxisConfig m_AxisConfigs[2];
+	};
+
 	struct EqReq {
 		EqReq(En_Command nCmd) :
 			m_nCmd(nCmd) {
@@ -127,8 +137,8 @@ namespace EQ {
 		}
 
 		uint32_t m_nMicrostepCount;
-		uint16_t m_nEncoderValueX;
-		uint16_t m_nEncoderValueY;
+		int16_t m_nEncoderValueX;
+		int16_t m_nEncoderValueY;
 	};
 
 	struct EqSetMotorValuesReq : public EqReq {

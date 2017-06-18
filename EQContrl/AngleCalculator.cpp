@@ -7,7 +7,7 @@
 
 //currentDateTime()
 
-void AngleCalculator::CalculateAngle(uint32_t nValueX, uint32_t nValueY) {
+void AngleCalculator::CalculateAngle(int32_t nValueX, int32_t nValueY) {
 	//double a = std::atan2(y, x);
 	/*if (nValueX < m_nMinValueX)
 		m_nMinValueX = nValueX;
@@ -21,5 +21,5 @@ void AngleCalculator::CalculateAngle(uint32_t nValueX, uint32_t nValueY) {
 	/*ENC("X: " << nValueX << "\t(" << m_nMinValueX << "-" << m_nMaxValueX << 
 		")\nY: " << nValueY << "\t(" << m_nMinValueY << "-" << m_nMaxValueY << ")");
 	if (nValueX < 10000 && nValueY < 10000)*/
-	//CDR(nValueX << ";" << nValueY << ";");
+	CDR(nValueX << ";" << nValueY << ";");
 }

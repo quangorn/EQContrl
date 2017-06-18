@@ -7,3 +7,7 @@ syntax: regexp
 ^ipch
 ^.*\.sdf$
 ^.*\.db$
+^AstroMountConfigurator/obj
+^AstroMountConfigurator/bin
+^WrapperLibrary/Debug
+^WrapperLibrary/Release

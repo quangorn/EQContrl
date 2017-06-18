@@ -43,6 +43,10 @@ DWORD Convert(En_Status nStatus) {
 
 En_Status Connect() {
 	LOG("Connect");
+	if (pHandle != nullptr) {
+		return STS_OK;
+	}
+
 	if (hid_init()) {
 		LOG("hid_init failed");
 		return STS_USB_INIT_FAILED;
@@ -55,6 +59,39 @@ En_Status Connect() {
 	}
 
 	return STS_OK;
+}
+
+En_Status Disconnect() {
+	LOG("Disconnect");
+	En_Status status = STS_OK;
+
+	if (pHandle == nullptr) {
+		return status;
+	}
+	
+	if (pHandle != nullptr) {
+		EqResp Resp;
+		status = SendAndReadResp(EqDeInitMotorsReq(), Resp);
+
+		hid_close(pHandle);
+		pHandle = nullptr;
+
+		/* Free static HIDAPI objects. */
+		hid_exit();
+	}
+
+	return status;
+}
+
+Config GetConfig() {
+	Config config;
+	config.m_AxisConfigs[MI_RA].m_nMaxFreq = 1000;
+	config.m_AxisConfigs[MI_RA].m_nMaxSpeed = 200;
+	config.m_AxisConfigs[MI_RA].m_nMicrosteps = 2;
+	config.m_AxisConfigs[MI_DEC].m_nMaxFreq = 3000;
+	config.m_AxisConfigs[MI_DEC].m_nMaxSpeed = 300;
+	config.m_AxisConfigs[MI_DEC].m_nMicrosteps = 32;
+	return std::move(config);
 }
 
 template <typename T>
@@ -132,10 +169,7 @@ En_Status SendAndReadResp(const T& Req, K& Resp) {
 EQCONTRL_API DWORD __stdcall EQ_Init(char *comportname, DWORD baud, DWORD timeout, DWORD retry) {
 	LOG("EQ_Init() comport:" << comportname << "; baud:" << baud << "; timeout:" << 
 		timeout << "; retry:" << retry << ";");
-	DWORD ret = 0;
-	if (pHandle == nullptr) {
-		ret = Convert(Connect());
-	}
+	DWORD ret = Convert(Connect());
 	LOG("EQ_Init() return:" << ret << ";");
 	return ret;
 }
@@ -171,17 +205,7 @@ EQCONTRL_API DWORD __stdcall EQ_InitMotors(DWORD RA_val, DWORD DEC_val) {
 //'
 EQCONTRL_API DWORD __stdcall EQ_End() {
 	LOG("EQ_End()");
-	DWORD ret = 0;
-	if (pHandle != nullptr) {
-		EqResp Resp;
-		ret = Convert(SendAndReadResp(EqDeInitMotorsReq(), Resp));
-		
-		hid_close(pHandle);
-		pHandle = nullptr;
-
-		/* Free static HIDAPI objects. */
-		hid_exit();
-	}
+	DWORD ret = Convert(Disconnect());
 	LOG("EQ_End() return:" << ret << ";");
 	return ret;
 }
@@ -296,7 +320,7 @@ EQCONTRL_API DWORD __stdcall EQ_GetMotorStatus(DWORD motor_id) {
 	DWORD ret;
 	if (nStatus == STS_OK) {
 		if (Resp.m_lEnabled) {
-			if (Resp.m_nDirection == DIR_REVERSE) { //TODO: возможно надо поменять местами
+			if (Resp.m_nDirection == DIR_FORWARD) {
 				ret = Resp.m_lRunning ? 144 : 128;
 			} else {
 				ret = Resp.m_lRunning ? 176 : 160;
@@ -539,30 +563,22 @@ EQCONTRL_API DWORD __stdcall EQ_SetCustomTrackRate(DWORD motor_id, DWORD trackmo
 EQCONTRL_API DWORD __stdcall EQ_SendGuideRate(DWORD motor_id, DWORD trackrate, DWORD guiderate, DWORD guidedir,
 	DWORD hemisphere, DWORD direction) {
 	LOG("EQ_SendGuideRate() motor_id:" << motor_id << "; trackrate:" << trackrate << "; guiderate:" << guiderate <<
-		"; guidedir:" << guidedir << "; hemisphere:" << hemisphere << "; direction:" << direction);
+		"; guidedir:" << guidedir << ";");
 	DWORD ret = 0;
-	En_MotorId nMotorId = (En_MotorId)motor_id;
-	//Для DEC направление на самом деле передаётся в guidedir, а direction всегда = 0
-	En_Direction nDirection = DIR_FORWARD;
 	double fRate = m_RateCalculator.GetRate((En_TrackRate)trackrate);
-	if (nMotorId == MI_RA) {
-		if (guidedir) {
-			fRate -= fRate * guiderate / 10;
-		}
-		else {
-			fRate += fRate * guiderate / 10;
-		}
-	} else { 
-		fRate *= (double)guiderate / 10;
-		nDirection = guidedir ? DIR_FORWARD : DIR_REVERSE; //Странно что не наоборот, возможно перепутали в EQMOD
+	if (guidedir) {
+		fRate -= fRate * guiderate / 10;
+	} else {
+		fRate += fRate * guiderate / 10;
 	}
-	uint16_t nFirst, nSecond;	
+	uint16_t nFirst, nSecond;
+	En_MotorId nMotorId = (En_MotorId)motor_id;
 	if (m_RateCalculator.CalculatePrescalersFromRate(nMotorId, fRate, nFirst, nSecond)) {
 		LOG("Rate: " << fRate << "; " << nFirst * nSecond <<
 			" = " << nFirst << " * " << nSecond);
 		EqResp Resp;
 		ret = Convert(SendAndReadResp(
-			EqStartTrackReq(nMotorId, (En_Hemisphere)hemisphere, nDirection, nFirst, nSecond),
+			EqStartTrackReq(nMotorId, (En_Hemisphere)hemisphere, (En_Direction)direction, nFirst, nSecond),
 			Resp));
 	}
 	else {
