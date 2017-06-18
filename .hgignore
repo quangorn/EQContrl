@@ -1,0 +1,9 @@
+syntax: regexp
+.vs
+^Debug
+^Release
+^EQContrl/Debug
+^EQContrl/Release
+^ipch
+^.*\.sdf$
+^.*\.db$
