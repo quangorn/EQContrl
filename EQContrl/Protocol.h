@@ -16,6 +16,8 @@ namespace EQ {
 		CMD_SLEW,
 		CMD_GOTO,
 		CMD_START_TRACK,
+		CMD_READ_CONFIG,
+		CMD_WRITE_CONFIG,
 	};
 
 	enum En_Status {
@@ -33,6 +35,8 @@ namespace EQ {
 		STS_MOTOR_BUSY,
 		STS_MOTOR_NOT_INITIALIZED,
 		STS_MOTOR_LIMIT_REACHED,
+		STS_FLASH_ERASE_ERROR,
+		STS_FLASH_PROGRAM_ERROR,
 	};
 
 	struct AxisConfig {
@@ -207,6 +211,28 @@ namespace EQ {
 		uint8_t m_nDirection;
 		uint16_t m_nFirstPrescaler;
 		uint16_t m_nSecondPrescaler;
+	};
+
+	struct EqReadConfigResp : public EqResp {
+		EqReadConfigResp() :
+			EqResp(STS_OK) {
+		}
+
+		EqReadConfigResp(const Config& Config) :
+			EqResp(STS_OK),
+			m_Config(Config) {
+		}
+
+		Config m_Config;
+	};
+
+	struct EqWriteConfigReq : public EqReq {
+		EqWriteConfigReq(const Config& Config) :
+			EqReq(CMD_WRITE_CONFIG),
+			m_Config(Config) {
+		}
+
+		Config m_Config;
 	};
 }
 

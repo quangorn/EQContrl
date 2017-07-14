@@ -84,14 +84,24 @@ En_Status Disconnect() {
 }
 
 Config GetConfig() {
-	Config config;
+	EqReadConfigResp Resp;
+	En_Status status = SendAndReadResp(EqReq(CMD_READ_CONFIG), Resp);
+	LOG("Read config result: " << status);
+	return std::move(Resp.m_Config);
+	/*Config config;
 	config.m_AxisConfigs[MI_RA].m_nMaxFreq = 1000;
 	config.m_AxisConfigs[MI_RA].m_nMaxSpeed = 200;
 	config.m_AxisConfigs[MI_RA].m_nMicrosteps = 2;
 	config.m_AxisConfigs[MI_DEC].m_nMaxFreq = 3000;
 	config.m_AxisConfigs[MI_DEC].m_nMaxSpeed = 300;
 	config.m_AxisConfigs[MI_DEC].m_nMicrosteps = 32;
-	return std::move(config);
+	return std::move(config);*/
+}
+
+En_Status WriteConfig(const Config& Config) {
+	En_Status status = SendReq(EqWriteConfigReq(Config));
+	LOG("Write config result: " << status);
+	return status;
 }
 
 template <typename T>

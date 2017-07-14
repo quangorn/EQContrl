@@ -21,7 +21,9 @@ namespace WrapperLibrary {
 		DEC_MOTOR_RUNNING,
 		MOTOR_BUSY,
 		MOTOR_NOT_INITIALIZED,
-		MOTOR_LIMIT_REACHED
+		MOTOR_LIMIT_REACHED,
+		FLASH_ERASE_ERROR,
+		FLASH_PROGRAM_ERROR,
 	};
 
 	public ref class AxisConfig {
@@ -33,6 +35,7 @@ namespace WrapperLibrary {
 
 	public ref class Config {
 	public:
+		Config();
 		array<AxisConfig^>^ AxisConfigs;
 	};
 
@@ -41,8 +44,10 @@ namespace WrapperLibrary {
 		static Status Connect();
 		static Status Disconnect();
 		static Config^ GetConfig();
+		static Status WriteConfig(Config^ config);
 
 	private:
 		static Config^ Convert(const EQ::Config& config);
+		static void Convert(EQ::Config& conf, Config^ config);
 	};
 }
