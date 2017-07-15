@@ -28,10 +28,10 @@ double RateCalculator::GetRate(EQ::En_TrackRate nTrackRate) const {
 	return 0;
 }
 
-bool RateCalculator::CalculatePrescalersFromRate(EQ::En_MotorId nMotorId, double fRate, uint16_t &nFirst, uint16_t &nSecond) const {
+bool RateCalculator::CalculatePrescalersFromRate(uint32_t nTotalMicrostepCount, double fRate, uint16_t &nFirst, uint16_t &nSecond) const {
 	if (!fRate)
 		return false;
 	double fPrescaler = ((double)MCU_TIMER_FREQ * (double)ARCSEC_TOTAL_COUNT) /
-		(fRate * (nMotorId == EQ::MI_RA ? TOTAL_MICROSTEP_COUNT_RA : TOTAL_MICROSTEP_COUNT_DEC));
+		(fRate * nTotalMicrostepCount);
 	return m_Factorizator.FactorizeFloatInTwoDivisors(fPrescaler, nFirst, nSecond);
 }

@@ -28,26 +28,37 @@ namespace WrapperLibrary {
 
 	public ref class AxisConfig {
 	public:
-		int MaxSpeed;
-		int MaxFreq;
-		int Microsteps;
+		property int MotorMaxRate;
+		property int MotorMaxAcceleration;
+		property int MicrostepCount;
+		property int StepsPerWormTurn;
+		property int WormGear;
+		property bool Reverse;
+
+		//Automatically calculated params
+		int MicrostepsDivider;
+		int SiderealPeriod;
+		int SiderealPsc;
 	};
 
 	public ref class Config {
 	public:
 		Config();
-		array<AxisConfig^>^ AxisConfigs;
+
+		property array<AxisConfig^>^ AxisConfigs;
+		property int EmergencyStopAccelerationMultiplier;
+		property bool LimitDetectorsReverse;
 	};
 
 	public ref class Connector {
 	public:
 		static Status Connect();
 		static Status Disconnect();
-		static Config^ GetConfig();
+		static Status ReadConfig(Config^ config);
 		static Status WriteConfig(Config^ config);
 
 	private:
-		static Config^ Convert(const EQ::Config& config);
-		static void Convert(EQ::Config& conf, Config^ config);
+		static void ConvertFromEq(Config^ config, const EQ::Config& conf);
+		static void ConvertToEq(EQ::Config& conf, Config^ config);
 	};
 }

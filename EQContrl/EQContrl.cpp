@@ -20,6 +20,25 @@ static hid_device *pHandle = nullptr;
 static uint8_t UsbBuf[USB_DATA_SIZE + 1];
 static RateCalculator m_RateCalculator;
 static AngleCalculator m_AngleCalculator;
+static Config m_Config;
+
+uint32_t WormMicrostepCount(int nMotorId, const Config& config) {
+	return (uint32_t)config.m_AxisConfigs[nMotorId].m_nMicrostepCount *
+		config.m_AxisConfigs[nMotorId].m_nStepsPerWormTurn /
+		(config.m_AxisConfigs[nMotorId].m_nMicrostepsDivider / 2);
+}
+
+uint32_t WormMicrostepCount(int nMotorId) {
+	return WormMicrostepCount(nMotorId, m_Config);
+}
+
+uint32_t TotalMicrostepCount(int nMotorId, const Config& config) {
+	return WormMicrostepCount(nMotorId, config) * config.m_AxisConfigs[nMotorId].m_nWormGear;
+}
+
+uint32_t TotalMicrostepCount(int nMotorId) {
+	return TotalMicrostepCount(nMotorId, m_Config);
+}
 
 DWORD Convert(En_Status nStatus) {
 	switch (nStatus) {
@@ -83,23 +102,36 @@ En_Status Disconnect() {
 	return status;
 }
 
-Config GetConfig() {
+En_Status ReadConfig(Config& config) {
 	EqReadConfigResp Resp;
 	En_Status status = SendAndReadResp(EqReq(CMD_READ_CONFIG), Resp);
+	if (status == STS_OK) {
+		config = Resp.m_Config;
+	}
 	LOG("Read config result: " << status);
-	return std::move(Resp.m_Config);
-	/*Config config;
-	config.m_AxisConfigs[MI_RA].m_nMaxFreq = 1000;
-	config.m_AxisConfigs[MI_RA].m_nMaxSpeed = 200;
-	config.m_AxisConfigs[MI_RA].m_nMicrosteps = 2;
-	config.m_AxisConfigs[MI_DEC].m_nMaxFreq = 3000;
-	config.m_AxisConfigs[MI_DEC].m_nMaxSpeed = 300;
-	config.m_AxisConfigs[MI_DEC].m_nMicrosteps = 32;
-	return std::move(config);*/
+	return status;
 }
 
-En_Status WriteConfig(const Config& Config) {
-	En_Status status = SendReq(EqWriteConfigReq(Config));
+En_Status WriteConfig(const Config& config) {
+	Config modConfig = config;
+	for (int i = EQ::MI_RA; i <= EQ::MI_DEC; i++) {
+		modConfig.m_AxisConfigs[i].m_nMicrostepsDivider = 2;
+		while (TotalMicrostepCount(i, modConfig) >= 0x1000000) {
+			modConfig.m_AxisConfigs[i].m_nMicrostepsDivider *= 2;
+		}
+
+		m_RateCalculator.CalculatePrescalersFromRate(
+			TotalMicrostepCount(i, modConfig),
+			m_RateCalculator.GetRate(TR_SIDEREAL),
+			modConfig.m_AxisConfigs[i].m_nSiderealPeriod,
+			modConfig.m_AxisConfigs[i].m_nSiderealPsc
+		);
+	}
+
+	En_Status status = SendReq(EqWriteConfigReq(modConfig));
+	if (status == STS_OK) {
+		m_Config = modConfig;
+	}
 	LOG("Write config result: " << status);
 	return status;
 }
@@ -179,7 +211,11 @@ En_Status SendAndReadResp(const T& Req, K& Resp) {
 EQCONTRL_API DWORD __stdcall EQ_Init(char *comportname, DWORD baud, DWORD timeout, DWORD retry) {
 	LOG("EQ_Init() comport:" << comportname << "; baud:" << baud << "; timeout:" << 
 		timeout << "; retry:" << retry << ";");
-	DWORD ret = Convert(Connect());
+	En_Status status = Connect();
+	if (status == STS_OK) {
+		status = ReadConfig(m_Config);
+	}
+	DWORD ret = Convert(status);
 	LOG("EQ_Init() return:" << ret << ";");
 	return ret;
 }
@@ -427,7 +463,7 @@ EQCONTRL_API DWORD __stdcall EQ_StartRATrack(DWORD trackrate, DWORD hemisphere, 
 	DWORD ret = 0;
 	double fRate = m_RateCalculator.GetRate((En_TrackRate)trackrate);
 	uint16_t nFirst, nSecond;
-	if (m_RateCalculator.CalculatePrescalersFromRate(EQ::MI_RA, fRate, nFirst, nSecond)) {
+	if (m_RateCalculator.CalculatePrescalersFromRate(TotalMicrostepCount(EQ::MI_RA), fRate, nFirst, nSecond)) {
 		LOG("Rate: " << fRate << "; " << nFirst * nSecond <<
 			" = " << nFirst << " * " << nSecond);
 		EqResp Resp;
@@ -516,7 +552,7 @@ EQCONTRL_API DWORD __stdcall EQ_SetCustomTrackRate(DWORD motor_id, DWORD trackmo
 	double fRate = (m_RateCalculator.GetRate(TR_SIDEREAL) * EQMOD_TRACK_FACTOR) / (trackoffset - 30000);
 	uint16_t nFirst, nSecond;
 	En_MotorId nMotorId = (En_MotorId)motor_id;
-	if (m_RateCalculator.CalculatePrescalersFromRate(nMotorId, fRate, nFirst, nSecond)) {
+	if (m_RateCalculator.CalculatePrescalersFromRate(TotalMicrostepCount(nMotorId), fRate, nFirst, nSecond)) {
 		LOG("Rate: " << fRate << "; " << nFirst * nSecond <<
 			" = " << nFirst << " * " << nSecond);
 		EqResp Resp;
@@ -583,7 +619,7 @@ EQCONTRL_API DWORD __stdcall EQ_SendGuideRate(DWORD motor_id, DWORD trackrate, D
 	}
 	uint16_t nFirst, nSecond;
 	En_MotorId nMotorId = (En_MotorId)motor_id;
-	if (m_RateCalculator.CalculatePrescalersFromRate(nMotorId, fRate, nFirst, nSecond)) {
+	if (m_RateCalculator.CalculatePrescalersFromRate(TotalMicrostepCount(nMotorId), fRate, nFirst, nSecond)) {
 		LOG("Rate: " << fRate << "; " << nFirst * nSecond <<
 			" = " << nFirst << " * " << nSecond);
 		EqResp Resp;
@@ -633,7 +669,7 @@ EQCONTRL_API DWORD __stdcall EQ_SetAutoguiderPortRate(DWORD motor_id, DWORD port
 //'
 EQCONTRL_API DWORD __stdcall EQ_GetTotal360microstep(DWORD motor_id) {
 	LOG("EQ_GetTotal360microstep() motor_id:" << motor_id << ";");
-	DWORD ret = motor_id == MI_RA ? TOTAL_MICROSTEP_COUNT_RA : TOTAL_MICROSTEP_COUNT_DEC;
+	DWORD ret = TotalMicrostepCount(motor_id);
 	LOG("EQ_GetTotal360microstep() return:" << ret << ";");
 	return ret;
 }
@@ -703,7 +739,11 @@ EQCONTRL_API DWORD __stdcall EQ_GP(DWORD motor_id, DWORD p_id) {
 	case PT_RA_MULTIPLIER: ret = 256; break;
 	case PT_RA_TRACK_FACTOR: ret = EQMOD_TRACK_FACTOR; break;
 	case PT_DEC_TRACK_FACTOR: ret = EQMOD_TRACK_FACTOR; break;
-	case PT_WORM_MICROSTEP_COUNT: ret = motor_id == MI_RA ? WORM_MICROSTEP_COUNT_RA : WORM_MICROSTEP_COUNT_DEC; break;
+	case PT_WORM_MICROSTEP_COUNT: 
+		ret = (uint32_t)m_Config.m_AxisConfigs[motor_id].m_nMicrostepCount *
+			m_Config.m_AxisConfigs[motor_id].m_nStepsPerWormTurn /
+			(m_Config.m_AxisConfigs[motor_id].m_nMicrostepsDivider / 2); 
+		break;
 	}
 	LOG("EQ_GP() return:" << ret << ";");
 	return ret;
