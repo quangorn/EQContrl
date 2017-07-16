@@ -2,16 +2,16 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:AstroMountConfigurator.Resources"
                     xmlns:v="clr-namespace:System;assembly=mscorlib">
-    <v:String x:Key="m_Status">Status</v:String>
-    <v:String x:Key="m_Connect">Connect</v:String>
-    <v:String x:Key="m_Disconnect">Disconnect</v:String>
-    <v:String x:Key="m_Write">Write</v:String>
-    <v:String x:Key="m_MotorMaxRate">Max motor rate</v:String>
-    <v:String x:Key="m_MotorMaxAcceleration">Max motor acceleration</v:String>
-    <v:String x:Key="m_MicrostepCount">Microsteps count</v:String>
-    <v:String x:Key="m_StepsPerWormTurn">Full steps per worm turn</v:String>
-	<v:String x:Key="m_WormGear">Worm gear ratio</v:String>
-    <v:String x:Key="m_Reverse">Reverse</v:String>
-    <v:String x:Key="m_EmergencyStopAccelerationMultiplier">Emergency stop acceleration multiplier</v:String>
-    <v:String x:Key="m_LimitDetectorsReverse">Reverse limit detectors</v:String>
+    <v:String x:Key="m_Status">Статус</v:String>
+    <v:String x:Key="m_Connect">Подключение</v:String>
+    <v:String x:Key="m_Disconnect">Отключение</v:String>
+    <v:String x:Key="m_Write">Запись</v:String>
+    <v:String x:Key="m_MotorMaxRate">Максимальная скорость</v:String>
+    <v:String x:Key="m_MotorMaxAcceleration">Максимальное ускорение</v:String>
+    <v:String x:Key="m_MicrostepCount">Кол-во микрошагов на шаг</v:String>
+    <v:String x:Key="m_StepsPerWormTurn">Кол-во полных шагов на оборот червяка</v:String>
+    <v:String x:Key="m_WormGear">Передаточное число червяка</v:String>
+    <v:String x:Key="m_Reverse">Инверсия оси</v:String>
+    <v:String x:Key="m_EmergencyStopAccelerationMultiplier">Множитель ускорения при срабатывании концевика</v:String>
+    <v:String x:Key="m_LimitDetectorsReverse">Инверсия концевиков</v:String>
 </ResourceDictionary>

@@ -34,7 +34,7 @@ namespace AstroMountConfigurator
         private void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
             var res = Connector.Connect();
-            this.StatusText.Text = $"Connect result: {res}";
+            this.StatusText.Text = $"Connect result: {res};";
             if (res == Status.OK)
             {
                 this.ConnectButton.IsEnabled = false;
@@ -42,7 +42,7 @@ namespace AstroMountConfigurator
                 this.WriteButton.IsEnabled = true;
                 res = Connector.ReadConfig(_config);
                 OnPropertyChanged(new PropertyChangedEventArgs("Config"));
-                //this.StatusText.Text = $"Read complete: {config}";
+                this.StatusText.Text = $"Read complete, dividers: {_config.AxisConfigs[0].MicrostepsDivider} {_config.AxisConfigs[1].MicrostepsDivider}";
             }
         }
 
