@@ -16,6 +16,8 @@ namespace EQ {
 		CMD_SLEW,
 		CMD_GOTO,
 		CMD_START_TRACK,
+		CMD_READ_CONFIG,
+		CMD_WRITE_CONFIG,
 	};
 
 	enum En_Status {
@@ -33,16 +35,28 @@ namespace EQ {
 		STS_MOTOR_BUSY,
 		STS_MOTOR_NOT_INITIALIZED,
 		STS_MOTOR_LIMIT_REACHED,
+		STS_FLASH_ERASE_ERROR,
+		STS_FLASH_PROGRAM_ERROR,
 	};
 
 	struct AxisConfig {
-		uint16_t m_nMaxSpeed;
-		uint16_t m_nMaxFreq;
-		uint16_t m_nMicrosteps;
+		uint16_t m_nMotorMaxRate;			//Max speed (1 = sidereal)
+		uint16_t m_nMicrostepCount;			//Microsteps per 1 step
+		uint16_t m_nStepsPerWormTurn;		//Full motor steps per 1 worm turn
+		uint16_t m_nWormGear;				//Worm gear turns per 360 turn
+		uint8_t m_nMotorMaxAcceleration;	//Sidereal rates per 12.5 ms
+		uint8_t m_lReverse;					//Reverse motor direction
+
+		//Automatically calculated params
+		uint16_t m_nMicrostepsDivider;		//Divider to microsteps count (needed to limit count to EQMOD max value)
+		uint16_t m_nSiderealPeriod;			//First timer freq divider for sidereal rate
+		uint16_t m_nSiderealPsc;			//Second timer freq divider for sidereal rate
 	};
 
 	struct Config {
 		AxisConfig m_AxisConfigs[2];
+		uint8_t m_nEmergencyStopAccelerationMultiplier;	//Multiplier to acceleration if limit detected
+		uint8_t m_lLimitDetectorsReverse;				//Reverse limit detectors direction
 	};
 
 	struct EqReq {
@@ -207,6 +221,28 @@ namespace EQ {
 		uint8_t m_nDirection;
 		uint16_t m_nFirstPrescaler;
 		uint16_t m_nSecondPrescaler;
+	};
+
+	struct EqReadConfigResp : public EqResp {
+		EqReadConfigResp() :
+			EqResp(STS_OK) {
+		}
+
+		EqReadConfigResp(const Config& Config) :
+			EqResp(STS_OK),
+			m_Config(Config) {
+		}
+
+		Config m_Config;
+	};
+
+	struct EqWriteConfigReq : public EqReq {
+		EqWriteConfigReq(const Config& Config) :
+			EqReq(CMD_WRITE_CONFIG),
+			m_Config(Config) {
+		}
+
+		Config m_Config;
 	};
 }
 

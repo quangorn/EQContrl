@@ -20,7 +20,9 @@ EQCONTRL_API EQ::En_Status Connect();
 
 EQCONTRL_API EQ::En_Status Disconnect();
 
-EQCONTRL_API EQ::Config GetConfig();
+EQCONTRL_API EQ::En_Status ReadConfig(EQ::Config& config);
+
+EQCONTRL_API EQ::En_Status WriteConfig(const EQ::Config& config);
 
 template <typename T>
 EQ::En_Status SendReq(const T& Req);
