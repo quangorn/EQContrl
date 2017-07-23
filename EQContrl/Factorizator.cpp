@@ -54,7 +54,7 @@ bool Factorizator::FactorizeFloatInTwoDivisors(double fComposite, uint16_t &nFir
 }
 
 bool Factorizator::FactorizeInTwoDivisors(uint32_t nComposite, uint16_t &nFirstOut, uint16_t &nSecondOut) const {
-    std::cout << "Try to factorize: " << nComposite << std::endl;
+    //std::cout << "Try to factorize: " << nComposite << std::endl;
     T_Divisors Divisors;
     if (!Factorize(nComposite, Divisors))
         return false;

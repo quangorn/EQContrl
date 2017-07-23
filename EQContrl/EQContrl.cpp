@@ -366,7 +366,7 @@ EQCONTRL_API DWORD __stdcall EQ_GetMotorStatus(DWORD motor_id) {
 	DWORD ret;
 	if (nStatus == STS_OK) {
 		if (Resp.m_lEnabled) {
-			if (Resp.m_nDirection == DIR_FORWARD) {
+			if (Resp.m_nDirection == DIR_REVERSE) { //TODO: возможно надо поменять местами
 				ret = Resp.m_lRunning ? 144 : 128;
 			} else {
 				ret = Resp.m_lRunning ? 176 : 160;
@@ -609,22 +609,31 @@ EQCONTRL_API DWORD __stdcall EQ_SetCustomTrackRate(DWORD motor_id, DWORD trackmo
 EQCONTRL_API DWORD __stdcall EQ_SendGuideRate(DWORD motor_id, DWORD trackrate, DWORD guiderate, DWORD guidedir,
 	DWORD hemisphere, DWORD direction) {
 	LOG("EQ_SendGuideRate() motor_id:" << motor_id << "; trackrate:" << trackrate << "; guiderate:" << guiderate <<
-		"; guidedir:" << guidedir << ";");
+		"; guidedir:" << guidedir << "; hemisphere:" << hemisphere << "; direction:" << direction);
 	DWORD ret = 0;
+	En_MotorId nMotorId = (En_MotorId)motor_id;
+	//Для DEC направление на самом деле передаётся в guidedir, а direction всегда = 0
+	En_Direction nDirection = DIR_FORWARD;
 	double fRate = m_RateCalculator.GetRate((En_TrackRate)trackrate);
-	if (guidedir) {
-		fRate -= fRate * guiderate / 10;
-	} else {
-		fRate += fRate * guiderate / 10;
+	if (nMotorId == MI_RA) {
+		if (guidedir) {
+			fRate -= fRate * guiderate / 10;
+		}
+		else {
+			fRate += fRate * guiderate / 10;
+		}
+	}
+	else {
+		fRate *= (double)guiderate / 10;
+		nDirection = guidedir ? DIR_FORWARD : DIR_REVERSE; //Странно что не наоборот, возможно перепутали в EQMOD
 	}
 	uint16_t nFirst, nSecond;
-	En_MotorId nMotorId = (En_MotorId)motor_id;
 	if (m_RateCalculator.CalculatePrescalersFromRate(TotalMicrostepCount(nMotorId), fRate, nFirst, nSecond)) {
 		LOG("Rate: " << fRate << "; " << nFirst * nSecond <<
 			" = " << nFirst << " * " << nSecond);
 		EqResp Resp;
 		ret = Convert(SendAndReadResp(
-			EqStartTrackReq(nMotorId, (En_Hemisphere)hemisphere, (En_Direction)direction, nFirst, nSecond),
+			EqStartTrackReq(nMotorId, (En_Hemisphere)hemisphere, nDirection, nFirst, nSecond),
 			Resp));
 	}
 	else {
@@ -633,6 +642,7 @@ EQCONTRL_API DWORD __stdcall EQ_SendGuideRate(DWORD motor_id, DWORD trackrate, D
 	LOG("EQ_SendGuideRate() return:" << ret << ";");
 	return ret;
 }
+
 
 //' Function name    : EQ_SetAutoguiderPortRate()
 //' Description      : Sets RA/DEC Autoguideport rate
