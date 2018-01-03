@@ -346,12 +346,12 @@ EQCONTRL_API DWORD __stdcall EQ_GetMotorValues(DWORD motor_id) {
 	else if (nStatus != STS_OK)
 		ret = 0x10000FF;
 	else {
-		ret = Resp.m_nMicrostepCount;
+		ret = Resp.m_nMicrostepCount >= 0x1000000 ? Resp.m_nMicrostepCount % TotalMicrostepCount(motor_id) : Resp.m_nMicrostepCount;
 		if (motor_id == MI_RA) {
 			m_AngleCalculator.CalculateAngle(Resp.m_nEncoderValueX, Resp.m_nEncoderValueY);
 		}
 	}
-	LOG("EQ_GetMotorValues() return:" << ret << ";");
+	LOG("EQ_GetMotorValues() return:" << ret << "; Real Count: " << Resp.m_nMicrostepCount);
 	return ret;
 }
 
