@@ -62,26 +62,37 @@
                             </StackPanel>
                         </Border>
 
+                        <!-- Buttons -->
+                        <Grid Margin="0 10 0 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
+                            <Button Grid.Column="0" x:Name="ConnectButton" Click="ConnectButton_Click" Content="{DynamicResource m_Connect}" Margin="0 0 10 0"/>
+                            <Button Grid.Column="1" x:Name="DisconnectButton" Click="DisconnectButton_Click" Content="{DynamicResource m_Disconnect}" IsEnabled="False"/>
+                            <Button Grid.Column="2" x:Name="WriteButton" Click="WriteButton_Click" Content="{DynamicResource m_Write}" IsEnabled="False" Margin="10 0 0 0"/>
+                        </Grid>
                     </StackPanel>
                 </TabItem>
-                <TabItem Header="{DynamicResource m_EncoderTest}">Вторая вкладка</TabItem>
+                <TabItem Header="{DynamicResource m_EncoderTest}">
+                    <StackPanel>
+                        <Grid Margin="0 10 0 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0" x:Name="EncoderStartButton" Click="EncoderStartButton_Click" Content="{DynamicResource m_EncoderStart}" Margin="0 0 10 0"/>
+                            <Button Grid.Column="1" x:Name="EncoderStopButton" Click="EncoderStopButton_Click" Content="{DynamicResource m_EncoderStop}" IsEnabled="False"/>
+                        </Grid>
+                        <TextBlock Text="{DynamicResource m_EncoderMotorSpeed}"/>
+                        <TextBox x:Name="EncoderMotorSpeed" Text="{Binding EncoderSpeed}"/>
+                    </StackPanel>
+                </TabItem>
             </TabControl>
             <TextBlock Text="{DynamicResource m_Status}" Margin="0 10 0 0"/>
             <TextBox x:Name="StatusText" IsReadOnly="True" Background="#eee" Padding="2"/>
-
-            <!-- Buttons -->
-            <Grid Margin="0 10 0 0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <Button Grid.Column="0" x:Name="ConnectButton" Click="ConnectButton_Click" Content="{DynamicResource m_Connect}" Margin="0 0 10 0"/>
-                <Button Grid.Column="1" x:Name="DisconnectButton" Click="DisconnectButton_Click" Content="{DynamicResource m_Disconnect}" IsEnabled="False"/>
-                <Button Grid.Column="2" x:Name="WriteButton" Click="WriteButton_Click" Content="{DynamicResource m_Write}" IsEnabled="False" Margin="10 0 0 0"/>
-            </Grid>
         </StackPanel>
     </Border>
 </Window>

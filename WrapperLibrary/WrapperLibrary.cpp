@@ -32,10 +32,47 @@ WrapperLibrary::Status WrapperLibrary::Connector::WriteConfig(Config^ config) {
 	return static_cast<Status>(::WriteConfig(conf));
 }
 
+WrapperLibrary::Status WrapperLibrary::Connector::StartRA_Motor(int speed) {
+	Status status = static_cast<Status>(::EQ_Init("", 0, 0, 0));
+	if (status != Status::OK) {
+		return status;
+	}
+	status = static_cast<Status>(::EQ_InitMotors(0x10000, 0x10000));
+	if (status != Status::OK) {
+		return status;
+	}
+	int rate = speed;
+	int direction = EQ::DIR_FORWARD;
+	if (speed < 0) {
+		rate = EQMOD_TRACK_FACTOR / -rate + 30000;
+		direction = EQ::DIR_REVERSE;
+	} else {
+		rate = EQMOD_TRACK_FACTOR / rate + 30000;
+	}
+	return static_cast<Status>(::EQ_SetCustomTrackRate(EQ::MI_RA, 1, rate, 0, 0, direction));
+}
+
+WrapperLibrary::Status WrapperLibrary::Connector::StopRA_Motor() {
+	Status status = static_cast<Status>(::EQ_MotorStop(EQ::MI_RA));
+	::EQ_MotorStop(EQ::MI_DEC);
+	::EQ_End();
+	return status;
+}
+
+WrapperLibrary::Status WrapperLibrary::Connector::GetEncoderValues(int% x, int% y) {
+	int xVal, yVal;
+	Status status = static_cast<Status>(::GetEncoderValues(xVal, yVal));
+	if (status == Status::OK) {
+		x = xVal;
+		y = yVal;
+	}
+	return status;
+}
+
 void WrapperLibrary::Connector::ConvertFromEq(WrapperLibrary::Config^ config, const EQ::Config& conf) {
 	for (int i = 0; i < config->AxisConfigs->Length; i++) {
 		auto& src = conf.m_AxisConfigs[i];
-		auto dst = config->AxisConfigs[i];
+		AxisConfig^ dst = (AxisConfig^)config->AxisConfigs[i];
 		dst->MotorMaxRate = src.m_nMotorMaxRate;
 		dst->MotorMaxAcceleration = src.m_nMotorMaxAcceleration;
 		dst->MicrostepCount = src.m_nMicrostepCount;
@@ -54,7 +91,7 @@ void WrapperLibrary::Connector::ConvertFromEq(WrapperLibrary::Config^ config, co
 void WrapperLibrary::Connector::ConvertToEq(EQ::Config& conf, WrapperLibrary::Config^ config) {
 	for (int i = 0; i < config->AxisConfigs->Length; i++) {
 		auto& dst = conf.m_AxisConfigs[i];
-		auto src = config->AxisConfigs[i];
+		AxisConfig^ src = (AxisConfig^)config->AxisConfigs[i];
 		dst.m_nMotorMaxRate = src->MotorMaxRate;
 		dst.m_nMotorMaxAcceleration = src->MotorMaxAcceleration;
 		dst.m_nMicrostepCount = src->MicrostepCount;

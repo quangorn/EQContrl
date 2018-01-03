@@ -24,6 +24,8 @@ EQCONTRL_API EQ::En_Status ReadConfig(EQ::Config& config);
 
 EQCONTRL_API EQ::En_Status WriteConfig(const EQ::Config& config);
 
+EQCONTRL_API EQ::En_Status GetEncoderValues(int& x, int& y);
+
 template <typename T>
 EQ::En_Status SendReq(const T& Req);
 

@@ -1,17 +1,20 @@
 ﻿using System.Windows;
 using WrapperLibrary;
 using System.ComponentModel;
+using System.Threading;
+using System.IO;
+using System;
 
 namespace AstroMountConfigurator
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window,  INotifyPropertyChanged
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private Config _config = new Config();
+        private Config _config { get; set; } = new Config();
 
         public Config Config
         {
@@ -24,6 +27,22 @@ namespace AstroMountConfigurator
                 _config = value;
             }
         }
+
+        private int _encoder_speed { get; set; } = 3;
+
+        public int EncoderSpeed
+        {
+            get
+            {
+                return _encoder_speed;
+            }
+            set
+            {
+                _encoder_speed = value;
+            }
+        }
+
+        private Thread _thread;
 
         public MainWindow()
         {
@@ -63,15 +82,61 @@ namespace AstroMountConfigurator
 
         private void WriteButton_Click(object sender, RoutedEventArgs e)
         {
-            //var config = new Config();
-            //config.AxisConfigs[0].MaxFreq = 1000;
-            //config.AxisConfigs[0].MaxSpeed = 100;
-            //config.AxisConfigs[0].Microsteps = 10;
-            //config.AxisConfigs[1].MaxFreq = 2000;
-            //config.AxisConfigs[1].MaxSpeed = 200;
-            //config.AxisConfigs[1].Microsteps = 20;
             var res = Connector.WriteConfig(_config);
             this.StatusText.Text = $"Write complete: {res}";
+        }
+
+        private void EncoderStartButton_Click(object sender, RoutedEventArgs e)
+        {
+            var res = Connector.StartRA_Motor(EncoderSpeed);
+            if (res == Status.OK)
+            {
+                this.EncoderStartButton.IsEnabled = false;
+                this.EncoderStopButton.IsEnabled = true;
+                _thread = new Thread(() =>
+                {
+                    Thread.CurrentThread.IsBackground = true;
+                    try
+                    {
+                        DateTime date = DateTime.Now;
+                        using (StreamWriter file = new StreamWriter(String.Format("test_{0:yyyy_MM_dd_HH_mm_ss}.txt", date)))
+                        {
+                            Thread.Sleep(2000);
+                            date = DateTime.Now;
+                            int x = 0, y = 0;
+                            for (int i = 0; true; i++)
+                            {
+                                var status = Connector.GetEncoderValues(ref x, ref y);
+                                if (status != Status.OK)
+                                {
+                                    //this.StatusText.Text = $"Get encoder values error: {status}";
+                                    return;
+                                }                                
+                                file.WriteLine(String.Format("{0};{1};{2};", DateTime.Now.Subtract(date).Ticks, x, y));
+                                Thread.Sleep(10);
+                            }
+                        }
+                    } catch (ThreadInterruptedException)
+                    {
+                        return;
+                    }
+                });
+                _thread.Start();
+            }
+            this.StatusText.Text = $"Start RA speed = {EncoderSpeed} complete: {res}";
+        }
+
+        private void EncoderStopButton_Click(object sender, RoutedEventArgs e)
+        {
+            var res = Connector.StopRA_Motor();
+            if (res == Status.OK)
+            {
+                this.EncoderStartButton.IsEnabled = true;
+                this.EncoderStopButton.IsEnabled = false;
+                _thread.Interrupt();
+                _thread.Join();
+            }
+            this.StatusText.Text = $"Stop RA complete: {res}";
         }
 
         private void OnPropertyChanged(PropertyChangedEventArgs e)

@@ -136,6 +136,17 @@ En_Status WriteConfig(const Config& config) {
 	return status;
 }
 
+En_Status GetEncoderValues(int& x, int& y) {
+	EqGetMotorValuesResp Resp;
+	En_Status nStatus = SendAndReadResp(EqGetMotorValuesReq(MI_RA), Resp);
+	if (nStatus == STS_OK) {
+		//m_AngleCalculator.CalculateAngle(Resp.m_nEncoderValueX, Resp.m_nEncoderValueY);
+		x = Resp.m_nEncoderValueX;
+		y = Resp.m_nEncoderValueY;
+	}	
+	return nStatus;
+}
+
 template <typename T>
 En_Status SendReq(const T& Req) {
 	if (pHandle == nullptr)

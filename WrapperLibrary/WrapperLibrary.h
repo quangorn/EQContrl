@@ -56,6 +56,9 @@ namespace WrapperLibrary {
 		static Status Disconnect();
 		static Status ReadConfig(Config^ config);
 		static Status WriteConfig(Config^ config);
+		static Status StartRA_Motor(int speed);
+		static Status StopRA_Motor();
+		static Status GetEncoderValues(int% x, int% y);
 
 	private:
 		static void ConvertFromEq(Config^ config, const EQ::Config& conf);
