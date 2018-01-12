@@ -28,7 +28,7 @@ namespace AstroMountConfigurator
             }
         }
 
-        private int _encoder_speed { get; set; } = 3;
+        private int _encoder_speed { get; set; } = 5;
 
         public int EncoderSpeed
         {
@@ -137,6 +137,18 @@ namespace AstroMountConfigurator
                 _thread.Join();
             }
             this.StatusText.Text = $"Stop RA complete: {res}";
+        }
+
+        private void EncoderWriteCorrectionButton_Click(object sender, RoutedEventArgs e)
+        {
+            //this.StatusText.Text = $"Write correction complete: {res}";
+        }
+
+        private void EncoderReadCorrectionButton_Click(object sender, RoutedEventArgs e)
+        {
+            byte[] data = new byte[64];
+            var res = Connector.ReadEncoderCorrection(0, data);
+            //this.StatusText.Text = $"Read correction complete: {res}";
         }
 
         private void OnPropertyChanged(PropertyChangedEventArgs e)

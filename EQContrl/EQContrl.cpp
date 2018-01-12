@@ -89,8 +89,7 @@ En_Status Disconnect() {
 	}
 	
 	if (pHandle != nullptr) {
-		EqResp Resp;
-		status = SendAndReadResp(EqDeInitMotorsReq(), Resp);
+		status = SendAndReadResp(EqReq(CMD_DEINIT_MOTORS));
 
 		hid_close(pHandle);
 		pHandle = nullptr;
@@ -147,6 +146,31 @@ En_Status GetEncoderValues(int& x, int& y) {
 	return nStatus;
 }
 
+En_Status WriteEncoderCorrection(uint8_t nPageNumber, const uint8_t(&data)[ENCODER_CORRECTION_PAGE_SIZE]) {
+	if (nPageNumber < 0 || nPageNumber > ENCODER_CORRECTION_PAGES_COUNT) {
+		return STS_INVALID_PARAMETERS;
+	}
+	EqWriteEncoderCorrectionReq Req(nPageNumber);
+	memcpy(Req.m_Data, data, ENCODER_CORRECTION_PAGE_SIZE);
+	return SendAndReadResp(Req);
+}
+
+En_Status ReadEncoderCorrection(uint8_t nPageNumber, uint8_t(&data)[ENCODER_CORRECTION_PAGE_SIZE]) {
+	if (nPageNumber < 0 || nPageNumber > ENCODER_CORRECTION_PAGES_COUNT) {
+		return STS_INVALID_PARAMETERS;
+	}
+	EqReadEncoderCorrectionResp Resp;
+	En_Status nStatus = SendAndReadResp(EqReadEncoderCorrectionReq(nPageNumber), Resp);
+	if (nStatus == STS_OK) {
+		memcpy(data, Resp.m_Data, ENCODER_CORRECTION_PAGE_SIZE);
+	}	
+	return nStatus;
+}
+
+En_Status ClearEncoderCorrection() {
+	return SendAndReadResp(EqReq(CMD_CLEAR_ENCODER_CORRECTION));
+}
+
 template <typename T>
 En_Status SendReq(const T& Req) {
 	if (pHandle == nullptr)
@@ -194,6 +218,12 @@ En_Status ReadResp(T& Resp) {
 	LOG("ReadResp failed. Required size: " << nRespSize <<
 		"; Read size: " << nReadSize << "; Decoded size: " << UsbBuf[0]);
 	return STS_WRONG_RESP_SIZE;
+}
+
+template <typename T>
+En_Status SendAndReadResp(const T& Req) {
+	EqResp Resp;
+	return SendAndReadResp(Req, Resp);
 }
 
 template <typename T, typename K>
@@ -248,8 +278,7 @@ EQCONTRL_API DWORD __stdcall EQ_Init(char *comportname, DWORD baud, DWORD timeou
 EQCONTRL_API DWORD __stdcall EQ_InitMotors(DWORD RA_val, DWORD DEC_val) {
 	LOG("EQ_InitMotors() RA:" << RA_val << "; DEC:" << DEC_val << ";");
 	DWORD ret = 0;
-	EqResp Resp;
-	ret = Convert(SendAndReadResp(EqInitMotorsReq(RA_val, DEC_val), Resp));
+	ret = Convert(SendAndReadResp(EqInitMotorsReq(RA_val, DEC_val)));
 	LOG("EQ_InitMotors() return:" << ret << ";");
 	return ret;
 }
@@ -283,8 +312,7 @@ EQCONTRL_API DWORD __stdcall EQ_End() {
 EQCONTRL_API DWORD __stdcall EQ_MotorStop(DWORD motor_id) {
 	LOG("EQ_MotorStop() motor_id:" << motor_id << ";");
 	DWORD ret = 0;
-	EqResp Resp;
-	ret = Convert(SendAndReadResp(EqStopMotorReq((En_MotorId)motor_id), Resp));
+	ret = Convert(SendAndReadResp(EqStopMotorReq((En_MotorId)motor_id)));
 	LOG("EQ_MotorStop() return:" << ret << ";");
 	return ret;
 }
@@ -316,9 +344,8 @@ EQCONTRL_API DWORD __stdcall EQ_StartMoveMotor(
 	LOG("EQ_StartMoveMotor() motor_id:" << motor_id << "; hemisphere:" << hemisphere << "; direction:" <<
 		direction << "; steps:" << steps << "; stepslowdown:" << stepslowdown << ";");
 	DWORD ret = 0;
-	EqResp Resp;
 	ret = Convert(SendAndReadResp(EqGoToReq(
-		(En_MotorId)motor_id, (En_Hemisphere)hemisphere, (En_Direction)direction, steps), Resp));
+		(En_MotorId)motor_id, (En_Hemisphere)hemisphere, (En_Direction)direction, steps)));
 	LOG("EQ_StartMoveMotor() return:" << ret << ";");
 	return ret;
 }
@@ -411,8 +438,7 @@ EQCONTRL_API DWORD __stdcall EQ_GetMotorStatus(DWORD motor_id) {
 EQCONTRL_API DWORD __stdcall EQ_SetMotorValues(DWORD motor_id, DWORD motor_val) {
 	LOG("EQ_SetMotorValues() motor_id:" << motor_id << "; motor_val:" << motor_val << ";");
 	DWORD ret = 0;
-	EqResp Resp;
-	ret = Convert(SendAndReadResp(EqSetMotorValuesReq((En_MotorId)motor_id, motor_val), Resp));
+	ret = Convert(SendAndReadResp(EqSetMotorValuesReq((En_MotorId)motor_id, motor_val)));
 	LOG("EQ_SetMotorValues() return:" << ret << ";");
 	return ret;
 }
@@ -440,10 +466,8 @@ EQCONTRL_API DWORD __stdcall EQ_Slew(DWORD motor_id, DWORD hemisphere, DWORD dir
 	LOG("EQ_Slew() motor_id:" << motor_id << "; hemisphere:" << hemisphere <<
 		"; direction:" << direction << "; rate:" << rate << ";");
 	DWORD ret = 0;
-	EqResp Resp;
 	ret = Convert(SendAndReadResp(
-		EqSlewReq((En_MotorId)motor_id, (En_Hemisphere)hemisphere, (En_Direction)direction, (uint16_t)rate), 
-		Resp));
+		EqSlewReq((En_MotorId)motor_id, (En_Hemisphere)hemisphere, (En_Direction)direction, (uint16_t)rate)));
 	LOG("EQ_Slew() return:" << ret << ";");
 	return ret;
 }
@@ -477,10 +501,8 @@ EQCONTRL_API DWORD __stdcall EQ_StartRATrack(DWORD trackrate, DWORD hemisphere, 
 	if (m_RateCalculator.CalculatePrescalersFromRate(TotalMicrostepCount(EQ::MI_RA), fRate, nFirst, nSecond)) {
 		LOG("Rate: " << fRate << "; " << nFirst * nSecond <<
 			" = " << nFirst << " * " << nSecond);
-		EqResp Resp;
 		ret = Convert(SendAndReadResp(
-			EqStartTrackReq(EQ::MI_RA, (En_Hemisphere)hemisphere, (En_Direction)direction, nFirst, nSecond),
-			Resp));
+			EqStartTrackReq(EQ::MI_RA, (En_Hemisphere)hemisphere, (En_Direction)direction, nFirst, nSecond)));
 	}
 	else {
 		ret = 999;
@@ -566,10 +588,8 @@ EQCONTRL_API DWORD __stdcall EQ_SetCustomTrackRate(DWORD motor_id, DWORD trackmo
 	if (m_RateCalculator.CalculatePrescalersFromRate(TotalMicrostepCount(nMotorId), fRate, nFirst, nSecond)) {
 		LOG("Rate: " << fRate << "; " << nFirst * nSecond <<
 			" = " << nFirst << " * " << nSecond);
-		EqResp Resp;
 		ret = Convert(SendAndReadResp(
-			EqStartTrackReq(nMotorId, (En_Hemisphere)hemisphere, (En_Direction)direction, nFirst, nSecond),
-			Resp));
+			EqStartTrackReq(nMotorId, (En_Hemisphere)hemisphere, (En_Direction)direction, nFirst, nSecond)));
 	}
 	else {
 		ret = 999;
@@ -642,10 +662,8 @@ EQCONTRL_API DWORD __stdcall EQ_SendGuideRate(DWORD motor_id, DWORD trackrate, D
 	if (m_RateCalculator.CalculatePrescalersFromRate(TotalMicrostepCount(nMotorId), fRate, nFirst, nSecond)) {
 		LOG("Rate: " << fRate << "; " << nFirst * nSecond <<
 			" = " << nFirst << " * " << nSecond);
-		EqResp Resp;
 		ret = Convert(SendAndReadResp(
-			EqStartTrackReq(nMotorId, (En_Hemisphere)hemisphere, nDirection, nFirst, nSecond),
-			Resp));
+			EqStartTrackReq(nMotorId, (En_Hemisphere)hemisphere, nDirection, nFirst, nSecond)));
 	}
 	else {
 		ret = 999;

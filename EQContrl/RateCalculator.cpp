@@ -4,17 +4,14 @@
 
 const double nSiderealDayLength = 86164.090530833; //seconds
 const double nSiderealRate = ARCSEC_TOTAL_COUNT / nSiderealDayLength; //arcsec/sec
-//const double nRA_SiderealFreqPrescaler = MCU_TIMER_FREQ * nSiderealDayLength / TOTAL_MICROSTEP_COUNT_RA;
 
 const double nSolarDayLength = 86400; //seconds
 const double nSolarRate = ARCSEC_TOTAL_COUNT / nSolarDayLength; //arcsec/sec
-//const double nRA_SolarFreqPrescaler = MCU_TIMER_FREQ * nSolarDayLength / TOTAL_MICROSTEP_COUNT_RA;
 
 const double nLunarMonth = 27.321661; //days
 const double nLunarFreq = (1 / nSiderealDayLength) - (1 / (24 * 3600 * nLunarMonth));
 const double nLunarDayLength = 1 / nLunarFreq; //seconds
 const double nLunarRate = ARCSEC_TOTAL_COUNT / nLunarDayLength; //arcsec/sec
-//const double nRA_LunarFreqPrescaler = MCU_TIMER_FREQ * nLunarDayLength / TOTAL_MICROSTEP_COUNT_RA;
 
 double RateCalculator::GetRate(EQ::En_TrackRate nTrackRate) const {
 	switch (nTrackRate) {

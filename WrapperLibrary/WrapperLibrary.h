@@ -59,6 +59,9 @@ namespace WrapperLibrary {
 		static Status StartRA_Motor(int speed);
 		static Status StopRA_Motor();
 		static Status GetEncoderValues(int% x, int% y);
+		static Status WriteEncoderCorrection(int pageNumber, const uint8_t(&data)[ENCODER_CORRECTION_PAGE_SIZE]);
+		static Status ReadEncoderCorrection(int pageNumber, uint8_t(&data)[ENCODER_CORRECTION_PAGE_SIZE]);
+		static Status ClearEncoderCorrection();
 
 	private:
 		static void ConvertFromEq(Config^ config, const EQ::Config& conf);

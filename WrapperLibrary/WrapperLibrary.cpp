@@ -69,6 +69,18 @@ WrapperLibrary::Status WrapperLibrary::Connector::GetEncoderValues(int% x, int% 
 	return status;
 }
 
+WrapperLibrary::Status WrapperLibrary::Connector::WriteEncoderCorrection(int pageNumber, const uint8_t(&data)[ENCODER_CORRECTION_PAGE_SIZE]) {
+	return static_cast<Status>(::WriteEncoderCorrection(pageNumber, data));
+}
+
+WrapperLibrary::Status WrapperLibrary::Connector::ReadEncoderCorrection(int pageNumber, uint8_t(&data)[ENCODER_CORRECTION_PAGE_SIZE]) {
+	return static_cast<Status>(::ReadEncoderCorrection(pageNumber, data));
+}
+
+WrapperLibrary::Status WrapperLibrary::Connector::ClearEncoderCorrection() {
+	return static_cast<Status>(::ClearEncoderCorrection());
+}
+
 void WrapperLibrary::Connector::ConvertFromEq(WrapperLibrary::Config^ config, const EQ::Config& conf) {
 	for (int i = 0; i < config->AxisConfigs->Length; i++) {
 		auto& src = conf.m_AxisConfigs[i];
@@ -78,13 +90,13 @@ void WrapperLibrary::Connector::ConvertFromEq(WrapperLibrary::Config^ config, co
 		dst->MicrostepCount = src.m_nMicrostepCount;
 		dst->StepsPerWormTurn = src.m_nStepsPerWormTurn;
 		dst->WormGear = src.m_nWormGear;
-		dst->Reverse = (bool)src.m_lReverse;
+		dst->Reverse = src.m_lReverse != 0;
 
 		dst->MicrostepsDivider = src.m_nMicrostepsDivider;
 		dst->SiderealPeriod = src.m_nSiderealPeriod;
 		dst->SiderealPsc = src.m_nSiderealPsc;
 	}
-	config->LimitDetectorsReverse = (bool)conf.m_lLimitDetectorsReverse;
+	config->LimitDetectorsReverse = conf.m_lLimitDetectorsReverse != 0;
 	config->EmergencyStopAccelerationMultiplier = conf.m_nEmergencyStopAccelerationMultiplier;
 }
 
