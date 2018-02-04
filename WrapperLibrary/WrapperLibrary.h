@@ -50,6 +50,17 @@ namespace WrapperLibrary {
 		property bool LimitDetectorsReverse;
 	};
 
+	public ref class EncoderCorrection {
+	public:
+		EncoderCorrection();
+
+		property short MinX;
+		property short MaxX;
+		property short MinY;
+		property short MaxY;
+		property array<short>^ Data;
+	};
+
 	public ref class Connector {
 	public:
 		static Status Connect();
@@ -59,9 +70,10 @@ namespace WrapperLibrary {
 		static Status StartRA_Motor(int speed);
 		static Status StopRA_Motor();
 		static Status GetEncoderValues(int% x, int% y);
-		static Status WriteEncoderCorrection(int pageNumber, const uint8_t(&data)[ENCODER_CORRECTION_PAGE_SIZE]);
-		static Status ReadEncoderCorrection(int pageNumber, uint8_t(&data)[ENCODER_CORRECTION_PAGE_SIZE]);
-		static Status ClearEncoderCorrection();
+		
+		static int GetEncoderCorrectionDataSize();
+		static Status WriteEncoderCorrection(EncoderCorrection^ correction);
+		static Status ReadEncoderCorrection(EncoderCorrection^ correction);
 
 	private:
 		static void ConvertFromEq(Config^ config, const EQ::Config& conf);

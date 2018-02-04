@@ -4,10 +4,20 @@
 
 #include "WrapperLibrary.h"
 
+using System::Runtime::InteropServices::Marshal;
+
 WrapperLibrary::Config::Config() {
 	AxisConfigs = gcnew array<WrapperLibrary::AxisConfig^>(2);
 	AxisConfigs[0] = gcnew AxisConfig();
 	AxisConfigs[1] = gcnew AxisConfig();
+}
+
+WrapperLibrary::EncoderCorrection::EncoderCorrection() {
+	MinX = 0;
+	MaxX = 0;
+	MinY = 0;
+	MaxY = 0;
+	Data = gcnew array<short>(ENCODER_CORRECTION_DATA_SIZE);
 }
 
 WrapperLibrary::Status WrapperLibrary::Connector::Connect() {
@@ -69,16 +79,61 @@ WrapperLibrary::Status WrapperLibrary::Connector::GetEncoderValues(int% x, int% 
 	return status;
 }
 
-WrapperLibrary::Status WrapperLibrary::Connector::WriteEncoderCorrection(int pageNumber, const uint8_t(&data)[ENCODER_CORRECTION_PAGE_SIZE]) {
-	return static_cast<Status>(::WriteEncoderCorrection(pageNumber, data));
+int WrapperLibrary::Connector::GetEncoderCorrectionDataSize() {
+	return ENCODER_CORRECTION_DATA_SIZE;
 }
 
-WrapperLibrary::Status WrapperLibrary::Connector::ReadEncoderCorrection(int pageNumber, uint8_t(&data)[ENCODER_CORRECTION_PAGE_SIZE]) {
-	return static_cast<Status>(::ReadEncoderCorrection(pageNumber, data));
+WrapperLibrary::Status WrapperLibrary::Connector::WriteEncoderCorrection(EncoderCorrection^ correction) {
+	if (correction->Data->Length != ENCODER_CORRECTION_DATA_SIZE) {
+		return Status::INVALID_PARAMETERS;
+	}
+	auto result = static_cast<Status>(::ClearEncoderCorrection()); //clear page of flash memory
+	if (result != Status::OK) {
+		return result;
+	}
+
+	uint8_t buf[ENCODER_CORRECTION_PAGE_SIZE];
+	int pageSize = ENCODER_CORRECTION_PAGE_SIZE / sizeof(uint16_t);
+	auto *ptr = (int16_t*)buf;
+	ptr[0] = correction->MinX;
+	ptr[1] = correction->MaxX;
+	ptr[2] = correction->MinY;
+	ptr[3] = correction->MaxY;
+	int targetPos = 4;
+	for (int srcPos = 0, pageNum = 0; srcPos < ENCODER_CORRECTION_DATA_SIZE; srcPos += (pageSize - targetPos), targetPos = 0, pageNum++) {
+		Marshal::Copy(correction->Data, srcPos, IntPtr(ptr + targetPos), pageSize - targetPos);
+		result = static_cast<Status>(::WriteEncoderCorrection(pageNum, buf));
+		if (result != Status::OK) {
+			return result;
+		}
+	}
+	return Status::OK;
 }
 
-WrapperLibrary::Status WrapperLibrary::Connector::ClearEncoderCorrection() {
-	return static_cast<Status>(::ClearEncoderCorrection());
+WrapperLibrary::Status WrapperLibrary::Connector::ReadEncoderCorrection(EncoderCorrection^ correction) {
+	if (correction->Data->Length != ENCODER_CORRECTION_DATA_SIZE) {
+		return Status::INVALID_PARAMETERS;
+	}
+
+	uint8_t buf[ENCODER_CORRECTION_PAGE_SIZE];
+	int pageSize = ENCODER_CORRECTION_PAGE_SIZE / sizeof(uint16_t);
+	auto *ptr = (int16_t*)buf;
+	int targetPos = 4;
+	Status result;
+	for (int srcPos = 0, pageNum = 0; srcPos < ENCODER_CORRECTION_DATA_SIZE; srcPos += (pageSize - targetPos), targetPos = 0, pageNum++) {
+		result = static_cast<Status>(::ReadEncoderCorrection(pageNum, buf));
+		if (result != Status::OK) {
+			return result;
+		}
+		if (pageNum == 0) {
+			correction->MinX = ptr[0];
+			correction->MaxX = ptr[1];
+			correction->MinY = ptr[2];
+			correction->MaxY = ptr[3];
+		}
+		Marshal::Copy(IntPtr(ptr + targetPos), correction->Data, srcPos, pageSize - targetPos);
+	}
+	return Status::OK;
 }
 
 void WrapperLibrary::Connector::ConvertFromEq(WrapperLibrary::Config^ config, const EQ::Config& conf) {

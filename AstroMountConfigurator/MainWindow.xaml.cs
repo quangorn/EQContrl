@@ -141,14 +141,24 @@ namespace AstroMountConfigurator
 
         private void EncoderWriteCorrectionButton_Click(object sender, RoutedEventArgs e)
         {
-            //this.StatusText.Text = $"Write correction complete: {res}";
+            EncoderCorrection correction = new EncoderCorrection();
+            correction.MinX = -5000;
+            correction.MaxX = 5000;
+            correction.MinY = -6000;
+            correction.MaxY = 6000;
+            for (short i = 0; i < correction.Data.Length; i++)
+            {
+                correction.Data[i] = (short)(512 - i);
+            }
+            var res = Connector.WriteEncoderCorrection(correction);
+            this.StatusText.Text = $"Write correction complete: {res}";
         }
 
         private void EncoderReadCorrectionButton_Click(object sender, RoutedEventArgs e)
         {
-            byte[] data = new byte[64];
-            var res = Connector.ReadEncoderCorrection(0, data);
-            //this.StatusText.Text = $"Read correction complete: {res}";
+            EncoderCorrection correction = new EncoderCorrection();
+            var res = Connector.ReadEncoderCorrection(correction);
+            this.StatusText.Text = $"Read correction complete: {res}";
         }
 
         private void OnPropertyChanged(PropertyChangedEventArgs e)
