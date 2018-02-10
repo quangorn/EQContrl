@@ -87,26 +87,13 @@ WrapperLibrary::Status WrapperLibrary::Connector::WriteEncoderCorrection(Encoder
 	if (correction->Data->Length != ENCODER_CORRECTION_DATA_SIZE) {
 		return Status::INVALID_PARAMETERS;
 	}
-	auto result = static_cast<Status>(::ClearEncoderCorrection()); //clear page of flash memory
+	
+	int16_t buf[ENCODER_CORRECTION_DATA_SIZE];
+	Marshal::Copy(correction->Data, 0, IntPtr(buf), ENCODER_CORRECTION_DATA_SIZE);
+	auto result = static_cast<Status>(::WriteEncoderCorrection(correction->MinX, correction->MaxX, correction->MinY, correction->MaxY, buf));
 	if (result != Status::OK) {
 		return result;
-	}
-
-	uint8_t buf[ENCODER_CORRECTION_PAGE_SIZE];
-	int pageSize = ENCODER_CORRECTION_PAGE_SIZE / sizeof(uint16_t);
-	auto *ptr = (int16_t*)buf;
-	ptr[0] = correction->MinX;
-	ptr[1] = correction->MaxX;
-	ptr[2] = correction->MinY;
-	ptr[3] = correction->MaxY;
-	int targetPos = 4;
-	for (int srcPos = 0, pageNum = 0; srcPos < ENCODER_CORRECTION_DATA_SIZE; srcPos += (pageSize - targetPos), targetPos = 0, pageNum++) {
-		Marshal::Copy(correction->Data, srcPos, IntPtr(ptr + targetPos), pageSize - targetPos);
-		result = static_cast<Status>(::WriteEncoderCorrection(pageNum, buf));
-		if (result != Status::OK) {
-			return result;
-		}
-	}
+	}	
 	return Status::OK;
 }
 
@@ -115,24 +102,17 @@ WrapperLibrary::Status WrapperLibrary::Connector::ReadEncoderCorrection(EncoderC
 		return Status::INVALID_PARAMETERS;
 	}
 
-	uint8_t buf[ENCODER_CORRECTION_PAGE_SIZE];
-	int pageSize = ENCODER_CORRECTION_PAGE_SIZE / sizeof(uint16_t);
-	auto *ptr = (int16_t*)buf;
-	int targetPos = 4;
-	Status result;
-	for (int srcPos = 0, pageNum = 0; srcPos < ENCODER_CORRECTION_DATA_SIZE; srcPos += (pageSize - targetPos), targetPos = 0, pageNum++) {
-		result = static_cast<Status>(::ReadEncoderCorrection(pageNum, buf));
-		if (result != Status::OK) {
-			return result;
-		}
-		if (pageNum == 0) {
-			correction->MinX = ptr[0];
-			correction->MaxX = ptr[1];
-			correction->MinY = ptr[2];
-			correction->MaxY = ptr[3];
-		}
-		Marshal::Copy(IntPtr(ptr + targetPos), correction->Data, srcPos, pageSize - targetPos);
+	int16_t buf[ENCODER_CORRECTION_DATA_SIZE];
+	int16_t minX, maxX, minY, maxY;
+	auto result = static_cast<Status>(::ReadEncoderCorrection(minX, maxX, minY, maxY, buf));	
+	if (result != Status::OK) {
+		return result;
 	}
+	correction->MinX = minX;
+	correction->MaxX = maxX;
+	correction->MinY = minY;
+	correction->MaxY = maxY;
+	Marshal::Copy(IntPtr(buf), correction->Data, 0, ENCODER_CORRECTION_DATA_SIZE);
 	return Status::OK;
 }
 

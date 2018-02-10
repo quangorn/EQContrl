@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EQContrl", "EQContrl\EQContrl.vcxproj", "{C1215991-893F-455D-995B-4AAF79894AD2}"
 EndProject
@@ -20,6 +20,7 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{C1215991-893F-455D-995B-4AAF79894AD2}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{C1215991-893F-455D-995B-4AAF79894AD2}.Debug|Any CPU.Build.0 = Debug|Win32
 		{C1215991-893F-455D-995B-4AAF79894AD2}.Debug|x64.ActiveCfg = Debug|x64
 		{C1215991-893F-455D-995B-4AAF79894AD2}.Debug|x64.Build.0 = Debug|x64
 		{C1215991-893F-455D-995B-4AAF79894AD2}.Debug|x86.ActiveCfg = Debug|Win32
@@ -42,6 +43,7 @@ Global
 		{5A222B71-5316-4D88-9DD5-C8E1D3B9699A}.Release|x86.ActiveCfg = Release|Any CPU
 		{5A222B71-5316-4D88-9DD5-C8E1D3B9699A}.Release|x86.Build.0 = Release|Any CPU
 		{7ADACBFD-B597-4C58-8910-9BB11A71A21D}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{7ADACBFD-B597-4C58-8910-9BB11A71A21D}.Debug|Any CPU.Build.0 = Debug|Win32
 		{7ADACBFD-B597-4C58-8910-9BB11A71A21D}.Debug|x64.ActiveCfg = Debug|x64
 		{7ADACBFD-B597-4C58-8910-9BB11A71A21D}.Debug|x64.Build.0 = Debug|x64
 		{7ADACBFD-B597-4C58-8910-9BB11A71A21D}.Debug|x86.ActiveCfg = Debug|Win32

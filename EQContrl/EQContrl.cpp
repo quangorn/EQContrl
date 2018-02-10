@@ -146,7 +146,7 @@ En_Status GetEncoderValues(int& x, int& y) {
 	return nStatus;
 }
 
-En_Status WriteEncoderCorrection(uint8_t nPageNumber, const uint8_t(&data)[ENCODER_CORRECTION_PAGE_SIZE]) {
+En_Status WriteEncoderCorrectionPage(uint8_t nPageNumber, const uint8_t* data) {
 	if (nPageNumber < 0 || nPageNumber > ENCODER_CORRECTION_PAGES_COUNT) {
 		return STS_INVALID_PARAMETERS;
 	}
@@ -155,7 +155,7 @@ En_Status WriteEncoderCorrection(uint8_t nPageNumber, const uint8_t(&data)[ENCOD
 	return SendAndReadResp(Req);
 }
 
-En_Status ReadEncoderCorrection(uint8_t nPageNumber, uint8_t(&data)[ENCODER_CORRECTION_PAGE_SIZE]) {
+En_Status ReadEncoderCorrectionPage(uint8_t nPageNumber, uint8_t* data) {
 	if (nPageNumber < 0 || nPageNumber > ENCODER_CORRECTION_PAGES_COUNT) {
 		return STS_INVALID_PARAMETERS;
 	}
@@ -169,6 +169,61 @@ En_Status ReadEncoderCorrection(uint8_t nPageNumber, uint8_t(&data)[ENCODER_CORR
 
 En_Status ClearEncoderCorrection() {
 	return SendAndReadResp(EqReq(CMD_CLEAR_ENCODER_CORRECTION));
+}
+
+En_Status WriteEncoderCorrection(int16_t minX, int16_t maxX, int16_t minY, int16_t maxY, const int16_t(&data)[ENCODER_CORRECTION_DATA_SIZE]) {
+	En_Status nStatus = ClearEncoderCorrection();
+	if (nStatus != STS_OK) {
+		return nStatus;
+	}
+
+	uint8_t buf[ENCODER_CORRECTION_PAGE_SIZE];
+	auto *ptr = (int16_t*)buf;
+	ptr[0] = minX;
+	ptr[1] = maxX;
+	ptr[2] = minY;
+	ptr[3] = maxY;
+	int pageNum = 0;
+	int pos = ENCODER_CORRECTION_PAGE_SIZE - sizeof(int16_t) * 4;
+	memcpy(ptr + 4, data, pos);
+	nStatus = WriteEncoderCorrectionPage(pageNum++, buf);
+	if (nStatus != STS_OK) {
+		return nStatus;
+	}
+
+	while (pageNum < ENCODER_CORRECTION_PAGES_COUNT) {
+		nStatus = WriteEncoderCorrectionPage(pageNum++, (uint8_t*)data + pos);
+		if (nStatus != STS_OK) {
+			return nStatus;
+		}
+		pos += ENCODER_CORRECTION_PAGE_SIZE;
+	}
+	return STS_OK;
+}
+
+En_Status ReadEncoderCorrection(int16_t& minX, int16_t& maxX, int16_t& minY, int16_t& maxY, int16_t(&data)[ENCODER_CORRECTION_DATA_SIZE]) {
+	uint8_t buf[ENCODER_CORRECTION_PAGE_SIZE];
+	int pageNum = 0;
+	En_Status nStatus = ReadEncoderCorrectionPage(pageNum++, buf);
+	if (nStatus != STS_OK) {
+		return nStatus;
+	}
+	auto *ptr = (int16_t*)buf;
+	minX = ptr[0];
+	maxX = ptr[1];
+	minY = ptr[2];
+	maxY = ptr[3];
+	int pos = ENCODER_CORRECTION_PAGE_SIZE - sizeof(int16_t) * 4;
+	memcpy(data, ptr + 4, pos);
+
+	while (pageNum < ENCODER_CORRECTION_PAGES_COUNT) {
+		nStatus = ReadEncoderCorrectionPage(pageNum++, (uint8_t*)data + pos);
+		if (nStatus != STS_OK) {
+			return nStatus;
+		}
+		pos += ENCODER_CORRECTION_PAGE_SIZE;
+	}
+	return STS_OK;
 }
 
 template <typename T>
