@@ -14,4 +14,6 @@
     <v:String x:Key="m_Reverse">Reverse</v:String>
     <v:String x:Key="m_EmergencyStopAccelerationMultiplier">Emergency stop acceleration multiplier</v:String>
     <v:String x:Key="m_LimitDetectorsReverse">Reverse limit detectors</v:String>
+    <v:String x:Key="m_Configuration">Configuration</v:String>
+    <v:String x:Key="m_EncoderTest">Encoder test</v:String>
 </ResourceDictionary>

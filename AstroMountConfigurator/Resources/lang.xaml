@@ -14,4 +14,16 @@
     <v:String x:Key="m_Reverse">Инверсия оси</v:String>
     <v:String x:Key="m_EmergencyStopAccelerationMultiplier">Множитель ускорения при срабатывании концевика</v:String>
     <v:String x:Key="m_LimitDetectorsReverse">Инверсия концевиков</v:String>
+    <v:String x:Key="m_Configuration">Конфигурация</v:String>
+    <v:String x:Key="m_EncoderTest">Калибровка энкодера</v:String>
+    <v:String x:Key="m_EncoderTest_1">1. Запуск двигателя и сохранение значений датчика в файл</v:String>
+    <v:String x:Key="m_EncoderTest_2">2. Открытие файла со значениями датчика и расчёт коррекции</v:String>
+    <v:String x:Key="m_EncoderTest_3">3. Запись коррекции в контролер</v:String>
+    <v:String x:Key="m_EncoderStart">Запуск</v:String>
+    <v:String x:Key="m_EncoderStop">Стоп</v:String>
+    <v:String x:Key="m_EncoderMotorSpeed">Множитель скорости</v:String>
+    <v:String x:Key="m_EncoderCorrectionFilePath">Путь к файлу с тестом</v:String>
+    <v:String x:Key="m_EncoderCorrectionOpenFile">Найти</v:String>
+    <v:String x:Key="m_EncoderCalculateCorrection">Расчёт коррекции</v:String>
+    <v:String x:Key="m_EncoderWriteCorrection">Запись</v:String>
 </ResourceDictionary>

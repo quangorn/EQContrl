@@ -50,15 +50,36 @@ namespace WrapperLibrary {
 		property bool LimitDetectorsReverse;
 	};
 
+	public ref class EncoderCorrection {
+	public:
+		EncoderCorrection();
+		bool Equals(Object^ obj) override;
+
+		property short MinX;
+		property short MaxX;
+		property short MinY;
+		property short MaxY;
+		property array<unsigned short>^ Data;
+	};
+
 	public ref class Connector {
 	public:
 		static Status Connect();
 		static Status Disconnect();
 		static Status ReadConfig(Config^ config);
 		static Status WriteConfig(Config^ config);
+		static Status StartRA_Motor(int speed);
+		static Status StopRA_Motor();
+		static Status GetEncoderValues(int% x, int% y);
+		
+		static int GetEncoderCorrectionDataSize();
+		static Status WriteEncoderCorrection(EncoderCorrection^ correction);
+		static Status ReadEncoderCorrection(EncoderCorrection^ correction);
 
 	private:
 		static void ConvertFromEq(Config^ config, const EQ::Config& conf);
 		static void ConvertToEq(EQ::Config& conf, Config^ config);
+
+		static bool m_lConnected = false;
 	};
 }

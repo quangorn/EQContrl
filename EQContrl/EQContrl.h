@@ -17,18 +17,25 @@ typedef unsigned long       DWORD;
 DWORD Convert(EQ::En_Status nStatus);
 
 EQCONTRL_API EQ::En_Status Connect();
-
 EQCONTRL_API EQ::En_Status Disconnect();
 
 EQCONTRL_API EQ::En_Status ReadConfig(EQ::Config& config);
-
 EQCONTRL_API EQ::En_Status WriteConfig(const EQ::Config& config);
+
+EQCONTRL_API EQ::En_Status GetEncoderValues(int& x, int& y);
+
+EQCONTRL_API EQ::En_Status ClearEncoderCorrection();
+EQCONTRL_API EQ::En_Status WriteEncoderCorrection(int16_t minX, int16_t maxX, int16_t minY, int16_t maxY, const uint16_t(&data)[ENCODER_CORRECTION_DATA_SIZE]);
+EQCONTRL_API EQ::En_Status ReadEncoderCorrection(int16_t& minX, int16_t& maxX, int16_t& minY, int16_t& maxY, uint16_t(&data)[ENCODER_CORRECTION_DATA_SIZE]);
 
 template <typename T>
 EQ::En_Status SendReq(const T& Req);
 
 template <typename T>
 EQ::En_Status ReadResp(T& Resp);
+
+template <typename T>
+EQ::En_Status SendAndReadResp(const T& Req);
 
 template <typename T, typename K>
 EQ::En_Status SendAndReadResp(const T& Req, K& Resp);

@@ -8,73 +8,117 @@
         Title="AstroMountConfigurator" Height="525" Width="525">
     <Border Padding="10">
         <StackPanel>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Border Grid.Column="0" BorderBrush="#ccc" BorderThickness="2 2 1 1" Padding="5">
+            <TabControl SelectedIndex="1">
+                <TabItem Header="{DynamicResource m_Configuration}">
                     <StackPanel>
-                        <TextBlock HorizontalAlignment="Center" FontWeight="Bold" Text="RA"/>
-                        <TextBlock Text="{DynamicResource m_MicrostepCount}"/>
-                        <TextBox x:Name="RA_MicrostepCount" Text="{Binding Config.AxisConfigs[0].MicrostepCount}"/>
-                        <TextBlock Text="{DynamicResource m_MotorMaxRate}"/>
-                        <TextBox x:Name="RA_MotorMaxRate" Text="{Binding Config.AxisConfigs[0].MotorMaxRate}"/>
-                        <TextBlock Text="{DynamicResource m_MotorMaxAcceleration}"/>
-                        <TextBox x:Name="RA_MotorMaxAcceleration" Text="{Binding Config.AxisConfigs[0].MotorMaxAcceleration}"/>
-                        <TextBlock Text="{DynamicResource m_StepsPerWormTurn}"/>
-                        <TextBox x:Name="RA_StepsPerWormTurn" Text="{Binding Config.AxisConfigs[0].StepsPerWormTurn}"/>
-                        <TextBlock Text="{DynamicResource m_WormGear}"/>
-                        <TextBox x:Name="RA_WormGear" Text="{Binding Config.AxisConfigs[0].WormGear}"/>
-                        <TextBlock Text="{DynamicResource m_Reverse}"/>
-                        <CheckBox x:Name="RA_Reverse" IsChecked="{Binding Config.AxisConfigs[0].Reverse}" Margin="5"/>
-                    </StackPanel>
-                </Border>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" BorderBrush="#ccc" BorderThickness="2 2 1 1" Padding="5">
+                                <StackPanel>
+                                    <TextBlock HorizontalAlignment="Center" FontWeight="Bold" Text="RA"/>
+                                    <TextBlock Text="{DynamicResource m_MicrostepCount}"/>
+                                    <TextBox x:Name="RA_MicrostepCount" Text="{Binding Config.AxisConfigs[0].MicrostepCount}"/>
+                                    <TextBlock Text="{DynamicResource m_MotorMaxRate}"/>
+                                    <TextBox x:Name="RA_MotorMaxRate" Text="{Binding Config.AxisConfigs[0].MotorMaxRate}"/>
+                                    <TextBlock Text="{DynamicResource m_MotorMaxAcceleration}"/>
+                                    <TextBox x:Name="RA_MotorMaxAcceleration" Text="{Binding Config.AxisConfigs[0].MotorMaxAcceleration}"/>
+                                    <TextBlock Text="{DynamicResource m_StepsPerWormTurn}"/>
+                                    <TextBox x:Name="RA_StepsPerWormTurn" Text="{Binding Config.AxisConfigs[0].StepsPerWormTurn}"/>
+                                    <TextBlock Text="{DynamicResource m_WormGear}"/>
+                                    <TextBox x:Name="RA_WormGear" Text="{Binding Config.AxisConfigs[0].WormGear}"/>
+                                    <TextBlock Text="{DynamicResource m_Reverse}"/>
+                                    <CheckBox x:Name="RA_Reverse" IsChecked="{Binding Config.AxisConfigs[0].Reverse}" Margin="5"/>
+                                </StackPanel>
+                            </Border>
 
-                <Border Grid.Column="1" BorderBrush="#ccc" BorderThickness="1 2 2 1" Padding="5">
+                            <Border Grid.Column="1" BorderBrush="#ccc" BorderThickness="1 2 2 1" Padding="5">
+                                <StackPanel>
+                                    <TextBlock HorizontalAlignment="Center" FontWeight="Bold" Text="DEC"/>
+                                    <TextBlock Text="{DynamicResource m_MicrostepCount}"/>
+                                    <TextBox x:Name="DEC_MicrostepCount" Text="{Binding Config.AxisConfigs[1].MicrostepCount}"/>
+                                    <TextBlock Text="{DynamicResource m_MotorMaxRate}"/>
+                                    <TextBox x:Name="DEC_MotorMaxRate" Text="{Binding Config.AxisConfigs[1].MotorMaxRate}"/>
+                                    <TextBlock Text="{DynamicResource m_MotorMaxAcceleration}"/>
+                                    <TextBox x:Name="DEC_MotorMaxAcceleration" Text="{Binding Config.AxisConfigs[1].MotorMaxAcceleration}"/>
+                                    <TextBlock Text="{DynamicResource m_StepsPerWormTurn}"/>
+                                    <TextBox x:Name="DEC_StepsPerWormTurn" Text="{Binding Config.AxisConfigs[1].StepsPerWormTurn}"/>
+                                    <TextBlock Text="{DynamicResource m_WormGear}"/>
+                                    <TextBox x:Name="DEC_WormGear" Text="{Binding Config.AxisConfigs[1].WormGear}"/>
+                                    <TextBlock Text="{DynamicResource m_Reverse}"/>
+                                    <CheckBox x:Name="DEC_Reverse" IsChecked="{Binding Config.AxisConfigs[1].Reverse}" Margin="5"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <Border BorderBrush="#ccc" BorderThickness="2 1 2 2" Padding="5">
+                            <StackPanel>
+                                <TextBlock Text="{DynamicResource m_EmergencyStopAccelerationMultiplier}"/>
+                                <TextBox x:Name="EmergencyStopAccelerationMultiplier" Text="{Binding Config.EmergencyStopAccelerationMultiplier}"/>
+                                <TextBlock Text="{DynamicResource m_LimitDetectorsReverse}"/>
+                                <CheckBox x:Name="LimitDetectorsReverse" IsChecked="{Binding Config.LimitDetectorsReverse}" Margin="5"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Buttons -->
+                        <Grid Margin="0 10 0 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Button Grid.Column="0" x:Name="ConnectButton" Click="ConnectButton_Click" Content="{DynamicResource m_Connect}" Margin="0 0 10 0"/>
+                            <Button Grid.Column="1" x:Name="DisconnectButton" Click="DisconnectButton_Click" Content="{DynamicResource m_Disconnect}" IsEnabled="False"/>
+                            <Button Grid.Column="2" x:Name="WriteButton" Click="WriteButton_Click" Content="{DynamicResource m_Write}" IsEnabled="False" Margin="10 0 0 0"/>
+                        </Grid>
+                    </StackPanel>
+                </TabItem>
+                <TabItem Header="{DynamicResource m_EncoderTest}">
                     <StackPanel>
-                        <TextBlock HorizontalAlignment="Center" FontWeight="Bold" Text="DEC"/>
-                        <TextBlock Text="{DynamicResource m_MicrostepCount}"/>
-                        <TextBox x:Name="DEC_MicrostepCount" Text="{Binding Config.AxisConfigs[1].MicrostepCount}"/>
-                        <TextBlock Text="{DynamicResource m_MotorMaxRate}"/>
-                        <TextBox x:Name="DEC_MotorMaxRate" Text="{Binding Config.AxisConfigs[1].MotorMaxRate}"/>
-                        <TextBlock Text="{DynamicResource m_MotorMaxAcceleration}"/>
-                        <TextBox x:Name="DEC_MotorMaxAcceleration" Text="{Binding Config.AxisConfigs[1].MotorMaxAcceleration}"/>
-                        <TextBlock Text="{DynamicResource m_StepsPerWormTurn}"/>
-                        <TextBox x:Name="DEC_StepsPerWormTurn" Text="{Binding Config.AxisConfigs[1].StepsPerWormTurn}"/>
-                        <TextBlock Text="{DynamicResource m_WormGear}"/>
-                        <TextBox x:Name="DEC_WormGear" Text="{Binding Config.AxisConfigs[1].WormGear}"/>
-                        <TextBlock Text="{DynamicResource m_Reverse}"/>
-                        <CheckBox x:Name="DEC_Reverse" IsChecked="{Binding Config.AxisConfigs[1].Reverse}" Margin="5"/>
+                        <Border BorderBrush="#ccc" BorderThickness="2 2 2 1" Padding="5">
+                            <StackPanel>
+                                <TextBlock FontWeight="Bold" Text="{DynamicResource m_EncoderTest_1}"/>
+                                <TextBlock Text="{DynamicResource m_EncoderMotorSpeed}" Margin="0 5 0 0"/>
+                                <TextBox x:Name="EncoderMotorSpeed" Text="{Binding EncoderSpeed}"/>
+                                <Grid Margin="0 10 0 0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Grid.Column="0" x:Name="EncoderStartButton" Click="EncoderStartButton_Click" Content="{DynamicResource m_EncoderStart}" Margin="0 0 10 0"/>
+                                    <Button Grid.Column="1" x:Name="EncoderStopButton" Click="EncoderStopButton_Click" Content="{DynamicResource m_EncoderStop}" IsEnabled="False"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                        <Border BorderBrush="#ccc" BorderThickness="2 1 2 1" Padding="5">
+                            <StackPanel>
+                                <TextBlock FontWeight="Bold" Text="{DynamicResource m_EncoderTest_2}"/>
+                                <TextBlock Margin="0 5 0 0" Text="{DynamicResource m_EncoderCorrectionFilePath}"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="5*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0" x:Name="EncoderCorrectionFilePath" Margin="0 0 10 0"/>
+                                    <Button Grid.Column="1" x:Name="EncoderFindCorrectionFileButton" Click="EncoderFindCorrectionFileButton_Click" Content="{DynamicResource m_EncoderCorrectionOpenFile}"/>
+                                </Grid>
+                                <Button x:Name="EncoderCalculateCorrectionButton" Click="EncoderCalculateCorrectionButton_Click" Content="{DynamicResource m_EncoderCalculateCorrection}" Margin="0 10 0 0" IsEnabled="False"/>
+                            </StackPanel>
+                        </Border>
+                        <Border BorderBrush="#ccc" BorderThickness="2 1 2 2" Padding="5">
+                            <StackPanel>
+                                <TextBlock FontWeight="Bold" Text="{DynamicResource m_EncoderTest_3}"/>
+                                <Button x:Name="EncoderWriteCorrectionButton" Click="EncoderWriteCorrectionButton_Click" Content="{DynamicResource m_EncoderWriteCorrection}" Margin="0 10 0 0" IsEnabled="False"/>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
-                </Border>
-            </Grid>
-
-            <Border BorderBrush="#ccc" BorderThickness="2 1 2 2" Padding="5">
-                <StackPanel>
-                    <TextBlock Text="{DynamicResource m_EmergencyStopAccelerationMultiplier}"/>
-                    <TextBox x:Name="EmergencyStopAccelerationMultiplier" Text="{Binding Config.EmergencyStopAccelerationMultiplier}"/>
-                    <TextBlock Text="{DynamicResource m_LimitDetectorsReverse}"/>
-                    <CheckBox x:Name="LimitDetectorsReverse" IsChecked="{Binding Config.LimitDetectorsReverse}" Margin="5"/>
-                </StackPanel>
-            </Border>
-            
+                </TabItem>
+            </TabControl>
             <TextBlock Text="{DynamicResource m_Status}" Margin="0 10 0 0"/>
             <TextBox x:Name="StatusText" IsReadOnly="True" Background="#eee" Padding="2"/>
-
-            <!-- Buttons -->
-            <Grid Margin="0 10 0 0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <Button Grid.Column="0" x:Name="ConnectButton" Click="ConnectButton_Click" Content="{DynamicResource m_Connect}" Margin="0 0 10 0"/>
-                <Button Grid.Column="1" x:Name="DisconnectButton" Click="DisconnectButton_Click" Content="{DynamicResource m_Disconnect}" IsEnabled="False"/>
-                <Button Grid.Column="2" x:Name="WriteButton" Click="WriteButton_Click" Content="{DynamicResource m_Write}" IsEnabled="False" Margin="10 0 0 0"/>
-            </Grid>
-
         </StackPanel>
     </Border>
 </Window>

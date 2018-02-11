@@ -18,6 +18,9 @@ namespace EQ {
 		CMD_START_TRACK,
 		CMD_READ_CONFIG,
 		CMD_WRITE_CONFIG,
+		CMD_READ_ENCODER_CORRECTION,
+		CMD_WRITE_ENCODER_CORRECTION,
+		CMD_CLEAR_ENCODER_CORRECTION,
 	};
 
 	enum En_Status {
@@ -88,12 +91,6 @@ namespace EQ {
 
 		uint32_t m_nRaVal;
 		uint32_t m_nDecVal;
-	};
-
-	struct EqDeInitMotorsReq : public EqReq {
-		EqDeInitMotorsReq() :
-			EqReq(CMD_DEINIT_MOTORS) {
-		}
 	};
 
 	struct EqGetMotorStatusReq : public EqReq {
@@ -243,6 +240,33 @@ namespace EQ {
 		}
 
 		Config m_Config;
+	};
+
+	struct EqReadEncoderCorrectionReq : public EqReq {
+		EqReadEncoderCorrectionReq(uint8_t nPageNumber) :
+			EqReq(CMD_READ_ENCODER_CORRECTION),
+			m_nPageNumber(nPageNumber)
+		{}
+
+		uint8_t m_nPageNumber;
+	};
+
+	struct EqReadEncoderCorrectionResp : public EqResp {
+		EqReadEncoderCorrectionResp() :
+			EqResp(STS_OK) {
+		}
+
+		uint8_t m_Data[ENCODER_CORRECTION_PAGE_SIZE];
+	};
+
+	struct EqWriteEncoderCorrectionReq : public EqReq {
+		EqWriteEncoderCorrectionReq(uint8_t nPageNumber) :
+			EqReq(CMD_WRITE_ENCODER_CORRECTION),
+			m_nPageNumber(nPageNumber)
+		{}
+
+		uint8_t m_nPageNumber;
+		uint8_t m_Data[ENCODER_CORRECTION_PAGE_SIZE];
 	};
 }
 
