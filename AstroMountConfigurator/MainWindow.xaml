@@ -78,24 +78,42 @@
                 </TabItem>
                 <TabItem Header="{DynamicResource m_EncoderTest}">
                     <StackPanel>
-                        <Grid Margin="0 10 0 0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0" x:Name="EncoderStartButton" Click="EncoderStartButton_Click" Content="{DynamicResource m_EncoderStart}" Margin="0 0 10 0"/>
-                            <Button Grid.Column="1" x:Name="EncoderStopButton" Click="EncoderStopButton_Click" Content="{DynamicResource m_EncoderStop}" IsEnabled="False"/>
-                        </Grid>
-                        <TextBlock Text="{DynamicResource m_EncoderMotorSpeed}"/>
-                        <TextBox x:Name="EncoderMotorSpeed" Text="{Binding EncoderSpeed}"/>
-                        <Grid Margin="0 10 0 0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0" x:Name="EncoderWriteCorrectionButton" Click="EncoderWriteCorrectionButton_Click" Content="{DynamicResource m_EncoderWriteCorrection}" Margin="0 0 10 0"/>
-                            <Button Grid.Column="1" x:Name="EncoderReadCorrectionButton" Click="EncoderReadCorrectionButton_Click" Content="{DynamicResource m_EncoderReadCorrection}"/>
-                        </Grid>
+                        <Border BorderBrush="#ccc" BorderThickness="2 2 2 1" Padding="5">
+                            <StackPanel>
+                                <TextBlock FontWeight="Bold" Text="{DynamicResource m_EncoderTest_1}"/>
+                                <TextBlock Text="{DynamicResource m_EncoderMotorSpeed}" Margin="0 5 0 0"/>
+                                <TextBox x:Name="EncoderMotorSpeed" Text="{Binding EncoderSpeed}"/>
+                                <Grid Margin="0 10 0 0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Grid.Column="0" x:Name="EncoderStartButton" Click="EncoderStartButton_Click" Content="{DynamicResource m_EncoderStart}" Margin="0 0 10 0"/>
+                                    <Button Grid.Column="1" x:Name="EncoderStopButton" Click="EncoderStopButton_Click" Content="{DynamicResource m_EncoderStop}" IsEnabled="False"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                        <Border BorderBrush="#ccc" BorderThickness="2 1 2 1" Padding="5">
+                            <StackPanel>
+                                <TextBlock FontWeight="Bold" Text="{DynamicResource m_EncoderTest_2}"/>
+                                <TextBlock Margin="0 5 0 0" Text="{DynamicResource m_EncoderCorrectionFilePath}"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="5*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0" x:Name="EncoderCorrectionFilePath" Margin="0 0 10 0"/>
+                                    <Button Grid.Column="1" x:Name="EncoderFindCorrectionFileButton" Click="EncoderFindCorrectionFileButton_Click" Content="{DynamicResource m_EncoderCorrectionOpenFile}"/>
+                                </Grid>
+                                <Button x:Name="EncoderCalculateCorrectionButton" Click="EncoderCalculateCorrectionButton_Click" Content="{DynamicResource m_EncoderCalculateCorrection}" Margin="0 10 0 0" IsEnabled="False"/>
+                            </StackPanel>
+                        </Border>
+                        <Border BorderBrush="#ccc" BorderThickness="2 1 2 2" Padding="5">
+                            <StackPanel>
+                                <TextBlock FontWeight="Bold" Text="{DynamicResource m_EncoderTest_3}"/>
+                                <Button x:Name="EncoderWriteCorrectionButton" Click="EncoderWriteCorrectionButton_Click" Content="{DynamicResource m_EncoderWriteCorrection}" Margin="0 10 0 0" IsEnabled="False"/>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                 </TabItem>
             </TabControl>

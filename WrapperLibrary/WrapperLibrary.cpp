@@ -17,33 +17,84 @@ WrapperLibrary::EncoderCorrection::EncoderCorrection() {
 	MaxX = 0;
 	MinY = 0;
 	MaxY = 0;
-	Data = gcnew array<short>(ENCODER_CORRECTION_DATA_SIZE);
+	Data = gcnew array<unsigned short>(ENCODER_CORRECTION_DATA_SIZE);
+}
+
+bool WrapperLibrary::EncoderCorrection::Equals(Object^ obj) {
+	if (obj == nullptr || obj->GetType() != EncoderCorrection::typeid) {
+		return false;
+	}
+	EncoderCorrection^ that = (EncoderCorrection^)obj;
+	if (MinX != that->MinX ||
+		MaxX != that->MaxX ||
+		MinY != that->MinY ||
+		MaxY != that->MaxY) {
+		return false;
+	}
+	if (Data == nullptr && that->Data == nullptr) {
+		return true;
+	}
+	if (Data == nullptr || that->Data == nullptr) {
+		return false;
+	}
+	if (Data->Length != that->Data->Length) {
+		return false;
+	}
+	for (int i = 0; i < Data->Length; i++) {
+		if (Data[i] != that->Data[i]) {
+			return false;
+		}
+	}
+	return true;
 }
 
 WrapperLibrary::Status WrapperLibrary::Connector::Connect() {
-	return static_cast<Status>(::Connect());
+	if (m_lConnected) {
+		return Status::OK;
+	}
+	Status status = static_cast<Status>(::Connect());
+	if (status == Status::OK) {
+		m_lConnected = true;
+	}
+	return status;
 }
 
 WrapperLibrary::Status WrapperLibrary::Connector::Disconnect() {
+	if (!m_lConnected) {
+		return Status::OK;
+	}
+	m_lConnected = false;
 	return static_cast<Status>(::Disconnect());
 }
 
 WrapperLibrary::Status WrapperLibrary::Connector::ReadConfig(Config^ config) {
+	Status status = Connect();
+	if (status != Status::OK) {
+		return status;
+	}
 	EQ::Config conf;
 	ConvertToEq(conf, config);
-	Status status = static_cast<Status>(::ReadConfig(conf));
+	status = static_cast<Status>(::ReadConfig(conf));
 	ConvertFromEq(config, conf);
 	return status;
 }
 
 WrapperLibrary::Status WrapperLibrary::Connector::WriteConfig(Config^ config) {
+	Status status = Connect();
+	if (status != Status::OK) {
+		return status;
+	}
 	EQ::Config conf;
 	ConvertToEq(conf, config);
 	return static_cast<Status>(::WriteConfig(conf));
 }
 
 WrapperLibrary::Status WrapperLibrary::Connector::StartRA_Motor(int speed) {
-	Status status = static_cast<Status>(::EQ_Init("", 0, 0, 0));
+	Status status = Connect();
+	if (status != Status::OK) {
+		return status;
+	}
+	status = static_cast<Status>(::EQ_Init("", 0, 0, 0));
 	if (status != Status::OK) {
 		return status;
 	}
@@ -65,7 +116,7 @@ WrapperLibrary::Status WrapperLibrary::Connector::StartRA_Motor(int speed) {
 WrapperLibrary::Status WrapperLibrary::Connector::StopRA_Motor() {
 	Status status = static_cast<Status>(::EQ_MotorStop(EQ::MI_RA));
 	::EQ_MotorStop(EQ::MI_DEC);
-	::EQ_End();
+	Disconnect();
 	return status;
 }
 
@@ -84,35 +135,39 @@ int WrapperLibrary::Connector::GetEncoderCorrectionDataSize() {
 }
 
 WrapperLibrary::Status WrapperLibrary::Connector::WriteEncoderCorrection(EncoderCorrection^ correction) {
+	Status status = Connect();
+	if (status != Status::OK) {
+		return status;
+	}
 	if (correction->Data->Length != ENCODER_CORRECTION_DATA_SIZE) {
 		return Status::INVALID_PARAMETERS;
 	}
 	
-	int16_t buf[ENCODER_CORRECTION_DATA_SIZE];
-	Marshal::Copy(correction->Data, 0, IntPtr(buf), ENCODER_CORRECTION_DATA_SIZE);
-	auto result = static_cast<Status>(::WriteEncoderCorrection(correction->MinX, correction->MaxX, correction->MinY, correction->MaxY, buf));
-	if (result != Status::OK) {
-		return result;
-	}	
-	return Status::OK;
+	uint16_t buf[ENCODER_CORRECTION_DATA_SIZE];
+	Marshal::Copy((array<short>^)correction->Data, 0, IntPtr(buf), ENCODER_CORRECTION_DATA_SIZE);
+	return static_cast<Status>(::WriteEncoderCorrection(correction->MinX, correction->MaxX, correction->MinY, correction->MaxY, buf));
 }
 
 WrapperLibrary::Status WrapperLibrary::Connector::ReadEncoderCorrection(EncoderCorrection^ correction) {
+	Status status = Connect();
+	if (status != Status::OK) {
+		return status;
+	}
 	if (correction->Data->Length != ENCODER_CORRECTION_DATA_SIZE) {
 		return Status::INVALID_PARAMETERS;
 	}
 
-	int16_t buf[ENCODER_CORRECTION_DATA_SIZE];
+	uint16_t buf[ENCODER_CORRECTION_DATA_SIZE];
 	int16_t minX, maxX, minY, maxY;
-	auto result = static_cast<Status>(::ReadEncoderCorrection(minX, maxX, minY, maxY, buf));	
-	if (result != Status::OK) {
-		return result;
+	status = static_cast<Status>(::ReadEncoderCorrection(minX, maxX, minY, maxY, buf));
+	if (status != Status::OK) {
+		return status;
 	}
 	correction->MinX = minX;
 	correction->MaxX = maxX;
 	correction->MinY = minY;
 	correction->MaxY = maxY;
-	Marshal::Copy(IntPtr(buf), correction->Data, 0, ENCODER_CORRECTION_DATA_SIZE);
+	Marshal::Copy(IntPtr(buf), (array<short>^)correction->Data, 0, ENCODER_CORRECTION_DATA_SIZE);
 	return Status::OK;
 }
 

@@ -53,12 +53,13 @@ namespace WrapperLibrary {
 	public ref class EncoderCorrection {
 	public:
 		EncoderCorrection();
+		bool Equals(Object^ obj) override;
 
 		property short MinX;
 		property short MaxX;
 		property short MinY;
 		property short MaxY;
-		property array<short>^ Data;
+		property array<unsigned short>^ Data;
 	};
 
 	public ref class Connector {
@@ -78,5 +79,7 @@ namespace WrapperLibrary {
 	private:
 		static void ConvertFromEq(Config^ config, const EQ::Config& conf);
 		static void ConvertToEq(EQ::Config& conf, Config^ config);
+
+		static bool m_lConnected = false;
 	};
 }

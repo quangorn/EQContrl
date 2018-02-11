@@ -171,7 +171,7 @@ En_Status ClearEncoderCorrection() {
 	return SendAndReadResp(EqReq(CMD_CLEAR_ENCODER_CORRECTION));
 }
 
-En_Status WriteEncoderCorrection(int16_t minX, int16_t maxX, int16_t minY, int16_t maxY, const int16_t(&data)[ENCODER_CORRECTION_DATA_SIZE]) {
+En_Status WriteEncoderCorrection(int16_t minX, int16_t maxX, int16_t minY, int16_t maxY, const uint16_t(&data)[ENCODER_CORRECTION_DATA_SIZE]) {
 	En_Status nStatus = ClearEncoderCorrection();
 	if (nStatus != STS_OK) {
 		return nStatus;
@@ -201,7 +201,7 @@ En_Status WriteEncoderCorrection(int16_t minX, int16_t maxX, int16_t minY, int16
 	return STS_OK;
 }
 
-En_Status ReadEncoderCorrection(int16_t& minX, int16_t& maxX, int16_t& minY, int16_t& maxY, int16_t(&data)[ENCODER_CORRECTION_DATA_SIZE]) {
+En_Status ReadEncoderCorrection(int16_t& minX, int16_t& maxX, int16_t& minY, int16_t& maxY, uint16_t(&data)[ENCODER_CORRECTION_DATA_SIZE]) {
 	uint8_t buf[ENCODER_CORRECTION_PAGE_SIZE];
 	int pageNum = 0;
 	En_Status nStatus = ReadEncoderCorrectionPage(pageNum++, buf);
