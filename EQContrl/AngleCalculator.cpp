@@ -1,13 +1,6 @@
 #include "AngleCalculator.h"
 
-//#define CDR(args) \
-//{ \
-//	m_fout << args; \
-//}
-
-//currentDateTime()
-
-void AngleCalculator::CalculateAngle(int32_t nValueX, int32_t nValueY) {
+void AngleCalculator::CalculateAngle(int16_t nValueX, int16_t nValueY) {
 	//double a = std::atan2(y, x);
 	/*if (nValueX < m_nMinValueX)
 		m_nMinValueX = nValueX;
