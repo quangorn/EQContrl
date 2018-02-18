@@ -8,7 +8,6 @@
 
 
 #define LOG_FILE "C:\\out.log"
-#define ENC_FILE "C:\\enc.txt"
 #define CDR_FILE "C:\\cdr.txt"
 
 inline std::string currentDateTime() {
@@ -29,14 +28,6 @@ inline std::string currentDateTime() {
 { \
 	static std::ofstream fout; \
 	fout.open(LOG_FILE, std::ios_base::app); \
-	fout << currentDateTime() << args << std::endl; \
-	fout.close(); \
-}
-
-#define ENC(args)// \
-{ \
-	static std::ofstream fout; \
-	fout.open(ENC_FILE, std::ios_base::app); \
 	fout << currentDateTime() << args << std::endl; \
 	fout.close(); \
 }

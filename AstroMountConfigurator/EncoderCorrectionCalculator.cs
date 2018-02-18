@@ -150,11 +150,15 @@ namespace AstroMountConfigurator
                 var interval = timeIntervals[i];
                 double startTime = i == 0 ? (interval.duration - meanDuration) : interval.startTime;
                 double intervalDuration = (i == 0 || i == timeIntervals.Count() - 1) ? meanDuration : interval.duration;
-                double itemDuration = (intervalDuration + 0.001) / tableSize;
+                double itemDuration = intervalDuration / tableSize;
                 for (int j = interval.startIndex; j <= interval.endIndex; j++)
                 {
                     var point = points[j];
                     int index = (int)((point.time - startTime) / itemDuration);
+                    if (index >= tableSize)
+                    {
+                        index = tableSize - 1;
+                    }
                     correctionTable[index].count++;
                     correctionTable[index].sum += point.atanValue;
                 }
@@ -166,7 +170,7 @@ namespace AstroMountConfigurator
                 curvePoints[i] = correctionTable[i].sum / correctionTable[i].count;
             }
 
-            int lastTableValue = 0;
+            ushort lastTableValue = 0;
             for (int i = 0; i < curvePoints.Count(); i++)
             {
                 //Raw
@@ -186,7 +190,7 @@ namespace AstroMountConfigurator
                     (GetPoint(curvePoints, i - 1) + GetPoint(curvePoints, i + 1)) * 15 / 64 +
                     GetPoint(curvePoints, i) * 5 / 16;
 
-                int tableValue = (int)((value + Math.PI) * tableLevels / (2 * Math.PI));
+                ushort tableValue = (ushort)((value + Math.PI) * tableLevels / (2 * Math.PI));
                 if (tableValue > lastTableValue)
                 {
                     lastTableValue = tableValue;
@@ -195,7 +199,7 @@ namespace AstroMountConfigurator
                 //{
                 //    Console.WriteLine($"Current value less than last: {tableValue} < {lastTableValue}");
                 //}
-                result.Data[i] = (ushort)lastTableValue;
+                result.Data[i] = lastTableValue;
             }
 
             return sb.ToString();

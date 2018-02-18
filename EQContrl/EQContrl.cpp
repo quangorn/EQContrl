@@ -135,13 +135,20 @@ En_Status WriteConfig(const Config& config) {
 	return status;
 }
 
-En_Status GetEncoderValues(int& x, int& y) {
+En_Status GetEncoderValues(int& x, int& y, double& angle) {
 	EqGetMotorValuesResp Resp;
 	En_Status nStatus = SendAndReadResp(EqGetMotorValuesReq(MI_RA), Resp);
 	if (nStatus == STS_OK) {
-		//m_AngleCalculator.CalculateAngle(Resp.m_nEncoderValueX, Resp.m_nEncoderValueY);
+		/*angle = m_AngleCalculator.CalculateAngle(Resp.m_nEncoderValueX, Resp.m_nEncoderValueY);
 		x = Resp.m_nEncoderValueX;
-		y = Resp.m_nEncoderValueY;
+		y = Resp.m_nEncoderValueY;*/
+
+		//TODO: remove (no sensor testing only)
+		int nWormMicrosteps = WormMicrostepCount(MI_RA);
+		double steps = (double)(Resp.m_nMicrostepCount % nWormMicrosteps) / nWormMicrosteps * 2 * M_PI - M_PI;
+		x = cos(steps) * m_AngleCalculator.m_nRangeX + m_AngleCalculator.m_nOffsetX;
+		y = sin(steps) * m_AngleCalculator.m_nRangeY + m_AngleCalculator.m_nOffsetY;
+		angle = m_AngleCalculator.CalculateAngle(x, y);
 	}	
 	return nStatus;
 }
@@ -168,7 +175,9 @@ En_Status ReadEncoderCorrectionPage(uint8_t nPageNumber, uint8_t* data) {
 }
 
 En_Status ClearEncoderCorrection() {
-	return SendAndReadResp(EqReq(CMD_CLEAR_ENCODER_CORRECTION));
+	En_Status nStatus = SendAndReadResp(EqReq(CMD_CLEAR_ENCODER_CORRECTION));
+	LOG("Clear encoder correction result: " << nStatus);
+	return nStatus;
 }
 
 En_Status WriteEncoderCorrection(int16_t minX, int16_t maxX, int16_t minY, int16_t maxY, const uint16_t(&data)[ENCODER_CORRECTION_DATA_SIZE]) {
@@ -187,18 +196,13 @@ En_Status WriteEncoderCorrection(int16_t minX, int16_t maxX, int16_t minY, int16
 	int pos = ENCODER_CORRECTION_PAGE_SIZE - sizeof(int16_t) * 4;
 	memcpy(ptr + 4, data, pos);
 	nStatus = WriteEncoderCorrectionPage(pageNum++, buf);
-	if (nStatus != STS_OK) {
-		return nStatus;
-	}
 
-	while (pageNum < ENCODER_CORRECTION_PAGES_COUNT) {
+	while (nStatus == STS_OK && pageNum < ENCODER_CORRECTION_PAGES_COUNT) {
 		nStatus = WriteEncoderCorrectionPage(pageNum++, (uint8_t*)data + pos);
-		if (nStatus != STS_OK) {
-			return nStatus;
-		}
 		pos += ENCODER_CORRECTION_PAGE_SIZE;
 	}
-	return STS_OK;
+	LOG("Write encoder correction result: " << nStatus);
+	return nStatus;
 }
 
 En_Status ReadEncoderCorrection(int16_t& minX, int16_t& maxX, int16_t& minY, int16_t& maxY, uint16_t(&data)[ENCODER_CORRECTION_DATA_SIZE]) {
@@ -206,6 +210,7 @@ En_Status ReadEncoderCorrection(int16_t& minX, int16_t& maxX, int16_t& minY, int
 	int pageNum = 0;
 	En_Status nStatus = ReadEncoderCorrectionPage(pageNum++, buf);
 	if (nStatus != STS_OK) {
+		LOG("Read encoder correction result: " << nStatus);
 		return nStatus;
 	}
 	auto *ptr = (int16_t*)buf;
@@ -216,14 +221,12 @@ En_Status ReadEncoderCorrection(int16_t& minX, int16_t& maxX, int16_t& minY, int
 	int pos = ENCODER_CORRECTION_PAGE_SIZE - sizeof(int16_t) * 4;
 	memcpy(data, ptr + 4, pos);
 
-	while (pageNum < ENCODER_CORRECTION_PAGES_COUNT) {
+	while (nStatus == STS_OK && pageNum < ENCODER_CORRECTION_PAGES_COUNT) {
 		nStatus = ReadEncoderCorrectionPage(pageNum++, (uint8_t*)data + pos);
-		if (nStatus != STS_OK) {
-			return nStatus;
-		}
 		pos += ENCODER_CORRECTION_PAGE_SIZE;
 	}
-	return STS_OK;
+	LOG("Read encoder correction result: " << nStatus);
+	return nStatus;
 }
 
 template <typename T>
@@ -310,6 +313,14 @@ EQCONTRL_API DWORD __stdcall EQ_Init(char *comportname, DWORD baud, DWORD timeou
 	En_Status status = Connect();
 	if (status == STS_OK) {
 		status = ReadConfig(m_Config);
+	}
+	if (status == STS_OK && !m_AngleCalculator.IsInited()) {
+		int16_t minX, maxX, minY, maxY;
+		uint16_t data[ENCODER_CORRECTION_DATA_SIZE];
+		status = ReadEncoderCorrection(minX, maxX, minY, maxY, data);
+		if (status == STS_OK) {
+			m_AngleCalculator.Init(minX, maxX, minY, maxY, data);
+		}
 	}
 	DWORD ret = Convert(status);
 	LOG("EQ_Init() return:" << ret << ";");
@@ -834,9 +845,7 @@ EQCONTRL_API DWORD __stdcall EQ_GP(DWORD motor_id, DWORD p_id) {
 	case PT_RA_TRACK_FACTOR: ret = EQMOD_TRACK_FACTOR; break;
 	case PT_DEC_TRACK_FACTOR: ret = EQMOD_TRACK_FACTOR; break;
 	case PT_WORM_MICROSTEP_COUNT: 
-		ret = (uint32_t)m_Config.m_AxisConfigs[motor_id].m_nMicrostepCount *
-			m_Config.m_AxisConfigs[motor_id].m_nStepsPerWormTurn /
-			(m_Config.m_AxisConfigs[motor_id].m_nMicrostepsDivider / 2); 
+		ret = WormMicrostepCount(motor_id);
 		break;
 	}
 	LOG("EQ_GP() return:" << ret << ";");

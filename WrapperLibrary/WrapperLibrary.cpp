@@ -120,12 +120,14 @@ WrapperLibrary::Status WrapperLibrary::Connector::StopRA_Motor() {
 	return status;
 }
 
-WrapperLibrary::Status WrapperLibrary::Connector::GetEncoderValues(int% x, int% y) {
+WrapperLibrary::Status WrapperLibrary::Connector::GetEncoderValues(int% x, int% y, double% a) {
 	int xVal, yVal;
-	Status status = static_cast<Status>(::GetEncoderValues(xVal, yVal));
+	double angle;
+	Status status = static_cast<Status>(::GetEncoderValues(xVal, yVal, angle));
 	if (status == Status::OK) {
 		x = xVal;
 		y = yVal;
+		a = angle;
 	}
 	return status;
 }

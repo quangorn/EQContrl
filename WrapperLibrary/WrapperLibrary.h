@@ -70,7 +70,7 @@ namespace WrapperLibrary {
 		static Status WriteConfig(Config^ config);
 		static Status StartRA_Motor(int speed);
 		static Status StopRA_Motor();
-		static Status GetEncoderValues(int% x, int% y);
+		static Status GetEncoderValues(int% x, int% y, double% a);
 		
 		static int GetEncoderCorrectionDataSize();
 		static Status WriteEncoderCorrection(EncoderCorrection^ correction);
