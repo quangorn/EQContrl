@@ -9,7 +9,8 @@ public:
 
 	AngleCalculator() :
 		m_lIsInited(false),
-		m_nLastAngle(0)
+		m_nLastAngle(0),
+		m_nLastCorrectionPos(0)
 	{}
 
 	void Init(int16_t nMinX, int16_t nMaxX,	int16_t nMinY, int16_t nMaxY, uint16_t(&CorrectionData)[ENCODER_CORRECTION_DATA_SIZE]);
@@ -25,8 +26,13 @@ public:
 
 private:
 	void InitRangeAndOffset();
+	double CorrectAngle(double radAngle);
+	void ChangeCorrectionPosition(double radAngle);
 
+	//TODO: make private
 public:
+	static const int m_nSize = ENCODER_CORRECTION_DATA_SIZE + 2;
+
 	bool m_lIsInited;
 	int16_t m_nMinX;
 	int16_t m_nMaxX;
@@ -37,5 +43,7 @@ public:
 	double m_nOffsetX;
 	double m_nOffsetY;
 	double m_nLastAngle;
-	double m_CorrectionData[ENCODER_CORRECTION_DATA_SIZE];
+
+	double m_CorrectionData[m_nSize];
+	int m_nLastCorrectionPos;
 };

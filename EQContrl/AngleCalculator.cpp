@@ -2,14 +2,20 @@
 #include <math.h>
 
 void AngleCalculator::Init(int16_t nMinX, int16_t nMaxX, int16_t nMinY, int16_t nMaxY, uint16_t(&CorrectionData)[ENCODER_CORRECTION_DATA_SIZE]) {
+	if (nMinX == -1 && nMaxX == -1 && nMinY == -1 && nMaxY == -1) {
+		return;
+	}
+	m_lIsInited = true;
 	m_nMinX = nMinX;
 	m_nMaxX = nMaxX;
 	m_nMinY = nMinY;
 	m_nMaxY = nMaxY;
 	InitRangeAndOffset();
 	for (int i = 0; i < ENCODER_CORRECTION_DATA_SIZE; i++) {
-		m_CorrectionData[i] = CorrectionData[i] * 2 * M_PI / 0x10000 - M_PI;
+		m_CorrectionData[i + 1] = CorrectionData[i] * 2 * M_PI / 0x10000 - M_PI;
 	}
+	m_CorrectionData[0] = -m_CorrectionData[1] - 2 * M_PI;
+	m_CorrectionData[m_nSize - 1] = -m_CorrectionData[m_nSize - 2] + 2 * M_PI;
 }
 
 void AngleCalculator::InitRangeAndOffset() {
@@ -20,6 +26,10 @@ void AngleCalculator::InitRangeAndOffset() {
 }
 
 double AngleCalculator::CalculateAngle(int16_t nValueX, int16_t nValueY) {
+	if (!m_lIsInited) {
+		return 0;
+	}
+
 	//In case of sensor disconnect
 	if ((nValueX == 0 && nValueY == 0) ||
 		(nValueX == -1 && nValueY == -1)) {
@@ -45,7 +55,31 @@ double AngleCalculator::CalculateAngle(int16_t nValueX, int16_t nValueY) {
 
 	double x = (nValueX - m_nOffsetX) / m_nRangeX;
 	double y = (nValueY - m_nOffsetY) / m_nRangeY;
-	double grad = std::atan2(y > -1 ? (y < 1 ? y : 1) : -1, x > -1 ? (x < 1 ? x : 1) : -1) * 180 / M_PI + 180;
-	CDR(nValueX << ";" << nValueY << ";" << grad << ";");
-	return grad;
+	double radAngle = std::atan2(y > -1 ? (y < 1 ? y : 1) : -1, x > -1 ? (x < 1 ? x : 1) : -1);
+	m_nLastAngle = CorrectAngle(radAngle);
+	CDR(nValueX << ";" << nValueY << ";" << m_nLastAngle << ";");
+	return m_nLastAngle;
+}
+
+double AngleCalculator::CorrectAngle(double radAngle) {
+	ChangeCorrectionPosition(radAngle);
+	double underPoint = m_CorrectionData[m_nLastCorrectionPos - 1];
+	double overPoint = m_CorrectionData[m_nLastCorrectionPos];
+	double betweenPointsDelta = (radAngle - underPoint) / (overPoint - underPoint);
+	return (betweenPointsDelta + m_nLastCorrectionPos - 1.5) * 360 / ENCODER_CORRECTION_DATA_SIZE;
+}
+
+void AngleCalculator::ChangeCorrectionPosition(double radAngle) {
+	if ((radAngle - m_CorrectionData[m_nLastCorrectionPos]) > M_PI) {
+		m_nLastCorrectionPos = m_nSize - 1;
+	} else if ((radAngle - m_CorrectionData[m_nLastCorrectionPos]) < -M_PI) {
+		m_nLastCorrectionPos = 1;
+	}
+		
+	while (radAngle > m_CorrectionData[m_nLastCorrectionPos]) {
+		m_nLastCorrectionPos++;
+	}
+	while (radAngle < m_CorrectionData[m_nLastCorrectionPos - 1]) {
+		m_nLastCorrectionPos--;
+	}
 }

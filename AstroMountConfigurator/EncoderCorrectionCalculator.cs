@@ -136,6 +136,40 @@ namespace AstroMountConfigurator
                 throw new Exception("No full period detected");
             }
 
+            //sort points on intervals border
+            for (int i = 0; i < timeIntervals.Count() - 1; i++)
+            {
+                int first = timeIntervals[i].endIndex;
+                int last = timeIntervals[i + 1].startIndex;
+                while (true)
+                {
+                    while (first < last && points[first].atanValue > 0)
+                        first++;
+                    while (first < last && points[last].atanValue < 0)
+                        last--;
+                    if (first < last)
+                    {
+                        double tmp = points[first].atanValue;
+                        points[first].atanValue = points[last].atanValue;
+                        points[last].atanValue = tmp;
+                    }
+                    else
+                    {
+                        if (points[first].atanValue < 0)
+                            first--;
+                        else
+                            last++;
+
+                        timeIntervals[i] = new TimeInterval(timeIntervals[i].startIndex, first, points[timeIntervals[i].startIndex].time,
+                            points[first].time - points[timeIntervals[i].startIndex].time);
+                        timeIntervals[i + 1] = new TimeInterval(last, timeIntervals[i + 1].endIndex, points[last].time, points[timeIntervals[i + 1].endIndex].time - points[last].time);
+                        //Console.WriteLine($"New interval: from {timeIntervals[i].startIndex} to {timeIntervals[i].endIndex}, duration: {timeIntervals[i].duration}");
+                        break;
+                    }
+                }
+            }
+            //Console.WriteLine($"New interval: from {timeIntervals.Last().startIndex} to {timeIntervals.Last().endIndex}, duration: {timeIntervals.Last().duration}");
+
             double meanDuration = 0;
             for (int i = 1; i < timeIntervals.Count() - 1; i++)
             {
@@ -208,7 +242,6 @@ namespace AstroMountConfigurator
         private void AddInterval(int startIndex, int endIndex)
         {
             timeIntervals.Add(new TimeInterval(startIndex, endIndex, points[startIndex].time, points[endIndex].time - points[startIndex].time));
-            //Console.WriteLine($"New interval: from {startIndex} to {endIndex}, duration: {timeIntervals.Last().duration}");
         }
 
         private static double GetPoint(double[] points, int index)
