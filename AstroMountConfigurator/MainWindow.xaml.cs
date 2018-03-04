@@ -16,6 +16,8 @@ namespace AstroMountConfigurator
         private string encoderCalibrationFolder = Directory.CreateDirectory("EncoderCalibration").FullName;
         private string encoderTestFileName;
 
+        private string pecFileName;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         private Config config { get; set; } = new Config();
@@ -205,6 +207,31 @@ namespace AstroMountConfigurator
                 return;
             }
             this.StatusText.Text = "Write and verify correction OK";
+        }
+
+        private void PEC_FindFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
+            if (openFileDialog.ShowDialog() == true)
+            {
+                this.PEC_FilePath.Text = openFileDialog.FileName;
+                this.PEC_WriteButton.IsEnabled = true;
+            }
+        }
+
+        private void PEC_WriteButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var loader = new PeriodicErrorCorrectionLoader(this.PEC_FilePath.Text);
+                loader.Load();
+                //correction = loader.result;
+            }
+            catch (Exception exc)
+            {
+                this.StatusText.Text = $"Load PEC error: {exc.Message}";
+            }
         }
 
         private void OnPropertyChanged(PropertyChangedEventArgs e)

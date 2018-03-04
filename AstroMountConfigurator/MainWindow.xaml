@@ -8,7 +8,7 @@
         Title="AstroMountConfigurator" Height="525" Width="525">
     <Border Padding="10">
         <StackPanel>
-            <TabControl SelectedIndex="1">
+            <TabControl SelectedIndex="2">
                 <TabItem Header="{DynamicResource m_Configuration}">
                     <StackPanel>
                         <Grid>
@@ -59,8 +59,6 @@
                                 <CheckBox x:Name="PeriodicErrorCorrectionEnabled" IsChecked="{Binding Config.PeriodicErrorCorrectionEnabled}" Margin="5"/>
                             </StackPanel>
                         </Border>
-
-                        <!-- Buttons -->
                         <Grid Margin="0 10 0 0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -112,6 +110,20 @@
                                 <Button x:Name="EncoderWriteCorrectionButton" Click="EncoderWriteCorrectionButton_Click" Content="{DynamicResource m_EncoderWriteCorrection}" Margin="0 10 0 0" IsEnabled="False"/>
                             </StackPanel>
                         </Border>
+                    </StackPanel>
+                </TabItem>
+                <TabItem Header="{DynamicResource m_PeriodicErrorCorrection}">
+                    <StackPanel>
+                        <TextBlock Text="{DynamicResource m_PEC_FilePath}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="5*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" x:Name="PEC_FilePath" Margin="0 0 10 0"/>
+                            <Button Grid.Column="1" x:Name="PEC_FindFileButton" Click="PEC_FindFileButton_Click" Content="{DynamicResource m_PEC_OpenFile}"/>
+                        </Grid>
+                        <Button x:Name="PEC_WriteButton" Click="PEC_WriteButton_Click" Content="{DynamicResource m_PEC_Write}" Margin="0 10 0 0" IsEnabled="False"/>
                     </StackPanel>
                 </TabItem>
             </TabControl>
