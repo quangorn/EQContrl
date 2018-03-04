@@ -32,3 +32,7 @@ bool RateCalculator::CalculatePrescalersFromRate(uint32_t nTotalMicrostepCount, 
 		(fRate * nTotalMicrostepCount);
 	return m_Factorizator.FactorizeFloatInTwoDivisors(fPrescaler, nFirst, nSecond);
 }
+
+double RateCalculator::GetWormPeriodSeconds(uint32_t nWormGear) {
+	return nSiderealDayLength / nWormGear;
+}

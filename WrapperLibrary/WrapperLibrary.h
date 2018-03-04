@@ -46,8 +46,7 @@ namespace WrapperLibrary {
 		Config();
 
 		property array<AxisConfig^>^ AxisConfigs;
-		property int EmergencyStopAccelerationMultiplier;
-		property bool LimitDetectorsReverse;
+		property bool PeriodicErrorCorrectionEnabled;
 	};
 
 	public ref class EncoderCorrection {

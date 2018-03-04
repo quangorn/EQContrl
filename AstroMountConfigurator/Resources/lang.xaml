@@ -12,8 +12,7 @@
     <v:String x:Key="m_StepsPerWormTurn">Кол-во полных шагов на оборот червяка</v:String>
     <v:String x:Key="m_WormGear">Передаточное число червяка</v:String>
     <v:String x:Key="m_Reverse">Инверсия оси</v:String>
-    <v:String x:Key="m_EmergencyStopAccelerationMultiplier">Множитель ускорения при срабатывании концевика</v:String>
-    <v:String x:Key="m_LimitDetectorsReverse">Инверсия концевиков</v:String>
+    <v:String x:Key="m_PeriodicErrorCorrectionEnabled">Включить встроенный PEC</v:String>
     <v:String x:Key="m_Configuration">Конфигурация</v:String>
     <v:String x:Key="m_EncoderTest">Калибровка энкодера</v:String>
     <v:String x:Key="m_EncoderTest_1">1. Запуск двигателя и сохранение значений датчика в файл</v:String>

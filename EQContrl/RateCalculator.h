@@ -14,6 +14,7 @@ public:
 
 	double GetRate(EQ::En_TrackRate nTrackRate) const;
 	bool CalculatePrescalersFromRate(uint32_t nTotalMicrostepCount, double fRate, uint16_t &nFirst, uint16_t &nSecond) const;
+	double GetWormPeriodSeconds(uint32_t nWormGear);
 
 private:
 	Factorizator m_Factorizator;

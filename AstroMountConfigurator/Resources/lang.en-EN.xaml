@@ -12,8 +12,7 @@
     <v:String x:Key="m_StepsPerWormTurn">Full steps per worm turn</v:String>
 	<v:String x:Key="m_WormGear">Worm gear ratio</v:String>
     <v:String x:Key="m_Reverse">Reverse</v:String>
-    <v:String x:Key="m_EmergencyStopAccelerationMultiplier">Emergency stop acceleration multiplier</v:String>
-    <v:String x:Key="m_LimitDetectorsReverse">Reverse limit detectors</v:String>
+    <v:String x:Key="m_PeriodicErrorCorrectionEnabled">Enable internal PEC</v:String>
     <v:String x:Key="m_Configuration">Configuration</v:String>
     <v:String x:Key="m_EncoderTest">Encoder test</v:String>
 </ResourceDictionary>

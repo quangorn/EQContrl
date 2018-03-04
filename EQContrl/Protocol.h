@@ -58,8 +58,7 @@ namespace EQ {
 
 	struct Config {
 		AxisConfig m_AxisConfigs[2];
-		uint8_t m_nEmergencyStopAccelerationMultiplier;	//Multiplier to acceleration if limit detected
-		uint8_t m_lLimitDetectorsReverse;				//Reverse limit detectors direction
+		uint8_t m_lPeriodicErrorCorrectionEnabled;
 	};
 
 	struct EqReq {

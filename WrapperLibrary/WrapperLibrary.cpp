@@ -188,8 +188,7 @@ void WrapperLibrary::Connector::ConvertFromEq(WrapperLibrary::Config^ config, co
 		dst->SiderealPeriod = src.m_nSiderealPeriod;
 		dst->SiderealPsc = src.m_nSiderealPsc;
 	}
-	config->LimitDetectorsReverse = conf.m_lLimitDetectorsReverse != 0;
-	config->EmergencyStopAccelerationMultiplier = conf.m_nEmergencyStopAccelerationMultiplier;
+	config->PeriodicErrorCorrectionEnabled = conf.m_lPeriodicErrorCorrectionEnabled != 0;
 }
 
 void WrapperLibrary::Connector::ConvertToEq(EQ::Config& conf, WrapperLibrary::Config^ config) {
@@ -203,6 +202,5 @@ void WrapperLibrary::Connector::ConvertToEq(EQ::Config& conf, WrapperLibrary::Co
 		dst.m_nWormGear = src->WormGear;
 		dst.m_lReverse = src->Reverse;
 	}
-	conf.m_lLimitDetectorsReverse = config->LimitDetectorsReverse;
-	conf.m_nEmergencyStopAccelerationMultiplier = config->EmergencyStopAccelerationMultiplier;
+	conf.m_lPeriodicErrorCorrectionEnabled = config->PeriodicErrorCorrectionEnabled;
 }

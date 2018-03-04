@@ -55,10 +55,8 @@
 
                         <Border BorderBrush="#ccc" BorderThickness="2 1 2 2" Padding="5">
                             <StackPanel>
-                                <TextBlock Text="{DynamicResource m_EmergencyStopAccelerationMultiplier}"/>
-                                <TextBox x:Name="EmergencyStopAccelerationMultiplier" Text="{Binding Config.EmergencyStopAccelerationMultiplier}"/>
-                                <TextBlock Text="{DynamicResource m_LimitDetectorsReverse}"/>
-                                <CheckBox x:Name="LimitDetectorsReverse" IsChecked="{Binding Config.LimitDetectorsReverse}" Margin="5"/>
+                                <TextBlock Text="{DynamicResource m_PeriodicErrorCorrectionEnabled}"/>
+                                <CheckBox x:Name="PeriodicErrorCorrectionEnabled" IsChecked="{Binding Config.PeriodicErrorCorrectionEnabled}" Margin="5"/>
                             </StackPanel>
                         </Border>
 
