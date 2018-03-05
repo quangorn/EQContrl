@@ -21,6 +21,9 @@ namespace EQ {
 		CMD_READ_ENCODER_CORRECTION,
 		CMD_WRITE_ENCODER_CORRECTION,
 		CMD_CLEAR_ENCODER_CORRECTION,
+		CMD_READ_PEC,
+		CMD_WRITE_PEC,
+		CMD_CLEAR_PEC,
 	};
 
 	enum En_Status {
@@ -255,7 +258,7 @@ namespace EQ {
 			EqResp(STS_OK) {
 		}
 
-		uint8_t m_Data[ENCODER_CORRECTION_PAGE_SIZE];
+		uint8_t m_Data[USB_FLASH_PAGE_SIZE];
 	};
 
 	struct EqWriteEncoderCorrectionReq : public EqReq {
@@ -265,7 +268,34 @@ namespace EQ {
 		{}
 
 		uint8_t m_nPageNumber;
-		uint8_t m_Data[ENCODER_CORRECTION_PAGE_SIZE];
+		uint8_t m_Data[USB_FLASH_PAGE_SIZE];
+	};
+
+	struct EqReadPEC_Req : public EqReq {
+		EqReadPEC_Req(uint8_t nPageNumber) :
+			EqReq(CMD_READ_PEC),
+			m_nPageNumber(nPageNumber)
+		{}
+
+		uint8_t m_nPageNumber;
+	};
+
+	struct EqReadPEC_Resp : public EqResp {
+		EqReadPEC_Resp() :
+			EqResp(STS_OK) {
+		}
+
+		uint8_t m_Data[USB_FLASH_PAGE_SIZE];
+	};
+
+	struct EqWritePEC_Req : public EqReq {
+		EqWritePEC_Req(uint8_t nPageNumber) :
+			EqReq(CMD_WRITE_PEC),
+			m_nPageNumber(nPageNumber)
+		{}
+
+		uint8_t m_nPageNumber;
+		uint8_t m_Data[USB_FLASH_PAGE_SIZE];
 	};
 }
 

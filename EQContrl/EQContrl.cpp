@@ -158,7 +158,7 @@ En_Status WriteEncoderCorrectionPage(uint8_t nPageNumber, const uint8_t* data) {
 		return STS_INVALID_PARAMETERS;
 	}
 	EqWriteEncoderCorrectionReq Req(nPageNumber);
-	memcpy(Req.m_Data, data, ENCODER_CORRECTION_PAGE_SIZE);
+	memcpy(Req.m_Data, data, USB_FLASH_PAGE_SIZE);
 	return SendAndReadResp(Req);
 }
 
@@ -169,7 +169,7 @@ En_Status ReadEncoderCorrectionPage(uint8_t nPageNumber, uint8_t* data) {
 	EqReadEncoderCorrectionResp Resp;
 	En_Status nStatus = SendAndReadResp(EqReadEncoderCorrectionReq(nPageNumber), Resp);
 	if (nStatus == STS_OK) {
-		memcpy(data, Resp.m_Data, ENCODER_CORRECTION_PAGE_SIZE);
+		memcpy(data, Resp.m_Data, USB_FLASH_PAGE_SIZE);
 	}	
 	return nStatus;
 }
@@ -186,27 +186,27 @@ En_Status WriteEncoderCorrection(int16_t minX, int16_t maxX, int16_t minY, int16
 		return nStatus;
 	}
 
-	uint8_t buf[ENCODER_CORRECTION_PAGE_SIZE];
+	uint8_t buf[USB_FLASH_PAGE_SIZE];
 	auto *ptr = (int16_t*)buf;
 	ptr[0] = minX;
 	ptr[1] = maxX;
 	ptr[2] = minY;
 	ptr[3] = maxY;
 	int pageNum = 0;
-	int pos = ENCODER_CORRECTION_PAGE_SIZE - sizeof(int16_t) * 4;
+	int pos = USB_FLASH_PAGE_SIZE - sizeof(int16_t) * 4;
 	memcpy(ptr + 4, data, pos);
 	nStatus = WriteEncoderCorrectionPage(pageNum++, buf);
 
 	while (nStatus == STS_OK && pageNum < ENCODER_CORRECTION_PAGES_COUNT) {
 		nStatus = WriteEncoderCorrectionPage(pageNum++, (uint8_t*)data + pos);
-		pos += ENCODER_CORRECTION_PAGE_SIZE;
+		pos += USB_FLASH_PAGE_SIZE;
 	}
 	LOG("Write encoder correction result: " << nStatus);
 	return nStatus;
 }
 
 En_Status ReadEncoderCorrection(int16_t& minX, int16_t& maxX, int16_t& minY, int16_t& maxY, uint16_t(&data)[ENCODER_CORRECTION_DATA_SIZE]) {
-	uint8_t buf[ENCODER_CORRECTION_PAGE_SIZE];
+	uint8_t buf[USB_FLASH_PAGE_SIZE];
 	int pageNum = 0;
 	En_Status nStatus = ReadEncoderCorrectionPage(pageNum++, buf);
 	if (nStatus != STS_OK) {
@@ -218,12 +218,12 @@ En_Status ReadEncoderCorrection(int16_t& minX, int16_t& maxX, int16_t& minY, int
 	maxX = ptr[1];
 	minY = ptr[2];
 	maxY = ptr[3];
-	int pos = ENCODER_CORRECTION_PAGE_SIZE - sizeof(int16_t) * 4;
+	int pos = USB_FLASH_PAGE_SIZE - sizeof(int16_t) * 4;
 	memcpy(data, ptr + 4, pos);
 
 	while (nStatus == STS_OK && pageNum < ENCODER_CORRECTION_PAGES_COUNT) {
 		nStatus = ReadEncoderCorrectionPage(pageNum++, (uint8_t*)data + pos);
-		pos += ENCODER_CORRECTION_PAGE_SIZE;
+		pos += USB_FLASH_PAGE_SIZE;
 	}
 	LOG("Read encoder correction result: " << nStatus);
 	return nStatus;
