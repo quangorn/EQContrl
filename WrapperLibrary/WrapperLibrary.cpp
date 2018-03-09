@@ -4,6 +4,8 @@
 
 #include "WrapperLibrary.h"
 
+#define MOTOR_INIT_POS 0x800000
+
 using System::Runtime::InteropServices::Marshal;
 
 WrapperLibrary::Config::Config() {
@@ -98,7 +100,7 @@ WrapperLibrary::Status WrapperLibrary::Connector::StartRA_Motor(int speed) {
 	if (status != Status::OK) {
 		return status;
 	}
-	status = static_cast<Status>(::EQ_InitMotors(0x10000, 0x10000));
+	status = static_cast<Status>(::EQ_InitMotors(MOTOR_INIT_POS, MOTOR_INIT_POS));
 	if (status != Status::OK) {
 		return status;
 	}
@@ -114,20 +116,51 @@ WrapperLibrary::Status WrapperLibrary::Connector::StartRA_Motor(int speed) {
 }
 
 WrapperLibrary::Status WrapperLibrary::Connector::StopRA_Motor() {
-	Status status = static_cast<Status>(::EQ_MotorStop(EQ::MI_RA));
 	::EQ_MotorStop(EQ::MI_DEC);
+	Status status = static_cast<Status>(::EQ_MotorStop(EQ::MI_RA));
+	if (status != Status::OK) {
+		Disconnect();
+		return status;
+	}
+	int motorStatus = 0;
+	do {
+		motorStatus = ::EQ_GetMotorStatus(EQ::MI_RA);
+	} while (motorStatus == EQ::MS_ROTATING_FRONT || motorStatus == EQ::MS_ROTATING_REAR);
+	if (motorStatus != EQ::MS_NOT_ROTATING_FRONT && motorStatus != EQ::MS_NOT_ROTATING_REAR) {
+		Disconnect();
+		return Status::MOTOR_NOT_INITIALIZED;
+	}
+	int motorPosition = EQ_GetMotorValues(EQ::MI_RA);
+	if (motorPosition >= 0x1000000) {
+		Disconnect();
+		return Status::USB_COMMUNICATION_ERROR;
+	}
+	int delta = motorPosition - MOTOR_INIT_POS;
+	motorStatus = ::EQ_StartMoveMotor(EQ::MI_RA, 0, delta > 0 ? EQ::DIR_REVERSE : EQ::DIR_FORWARD,
+		::abs(delta), 0);
+
+	do {
+		::Sleep(50);
+		motorStatus = ::EQ_GetMotorStatus(EQ::MI_RA);		
+	} while (motorStatus == EQ::MS_ROTATING_FRONT || motorStatus == EQ::MS_ROTATING_REAR);
+	if (motorStatus != EQ::MS_NOT_ROTATING_FRONT && motorStatus != EQ::MS_NOT_ROTATING_REAR) {
+		Disconnect();
+		return Status::MOTOR_NOT_INITIALIZED;
+	}
+	motorPosition = EQ_GetMotorValues(EQ::MI_RA);
 	Disconnect();
-	return status;
+	return motorPosition == MOTOR_INIT_POS ? Status::OK : Status::MOTOR_BUSY;
 }
 
-WrapperLibrary::Status WrapperLibrary::Connector::GetEncoderValues(int% x, int% y, double% a) {
-	int xVal, yVal;
+WrapperLibrary::Status WrapperLibrary::Connector::GetEncoderValues(int% x, int% y, int% motorSteps, double% a) {
+	int xVal, yVal, motorVal;
 	double angle;
-	Status status = static_cast<Status>(::GetEncoderValues(xVal, yVal, angle));
+	Status status = static_cast<Status>(::GetEncoderValues(xVal, yVal, motorVal, angle));
 	if (status == Status::OK) {
 		x = xVal;
 		y = yVal;
 		a = angle;
+		motorSteps = motorVal;
 	}
 	return status;
 }

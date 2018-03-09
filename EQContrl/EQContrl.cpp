@@ -135,20 +135,21 @@ En_Status WriteConfig(const Config& config) {
 	return status;
 }
 
-En_Status GetEncoderValues(int& x, int& y, double& angle) {
+En_Status GetEncoderValues(int& x, int& y, int& motorSteps, double& angle) {
 	EqGetMotorValuesResp Resp;
 	En_Status nStatus = SendAndReadResp(EqGetMotorValuesReq(MI_RA), Resp);
 	if (nStatus == STS_OK) {
-		/*angle = m_AngleCalculator.CalculateAngle(Resp.m_nEncoderValueX, Resp.m_nEncoderValueY);
+		motorSteps = Resp.m_nMicrostepCount;
+		angle = m_AngleCalculator.CalculateAngle(Resp.m_nEncoderValueX, Resp.m_nEncoderValueY);
 		x = Resp.m_nEncoderValueX;
-		y = Resp.m_nEncoderValueY;*/
+		y = Resp.m_nEncoderValueY;
 
 		//TODO: remove (no sensor testing only)
-		int nWormMicrosteps = WormMicrostepCount(MI_RA);
+		/*int nWormMicrosteps = WormMicrostepCount(MI_RA);
 		double steps = (double)(Resp.m_nMicrostepCount % nWormMicrosteps) / nWormMicrosteps * 2 * M_PI - M_PI;
 		x = cos(steps) * m_AngleCalculator.m_nRangeX + m_AngleCalculator.m_nOffsetX;
 		y = sin(steps) * m_AngleCalculator.m_nRangeY + m_AngleCalculator.m_nOffsetY;
-		angle = m_AngleCalculator.CalculateAngle(x, y);
+		angle = m_AngleCalculator.CalculateAngle(x, y);*/
 	}	
 	return nStatus;
 }
@@ -471,13 +472,13 @@ EQCONTRL_API DWORD __stdcall EQ_GetMotorStatus(DWORD motor_id) {
 	if (nStatus == STS_OK) {
 		if (Resp.m_lEnabled) {
 			if (Resp.m_nDirection == DIR_REVERSE) { //TODO: возможно надо поменять местами
-				ret = Resp.m_lRunning ? 144 : 128;
+				ret = Resp.m_lRunning ? MS_ROTATING_FRONT : MS_NOT_ROTATING_FRONT;
 			} else {
-				ret = Resp.m_lRunning ? 176 : 160;
+				ret = Resp.m_lRunning ? MS_ROTATING_REAR : MS_NOT_ROTATING_REAR;
 			}
 		}
 		else {
-			ret = 200;
+			ret = MS_NOT_INITIALIZED;
 		}
 	} else {
 		ret = Convert(nStatus);

@@ -42,4 +42,12 @@ namespace EQ {
 		PT_DEC_TRACK_FACTOR     = 10005,
 		PT_WORM_MICROSTEP_COUNT = 10006,
 	};
+
+	enum En_MotorStatus {
+		MS_NOT_ROTATING_FRONT = 128, //Motor not rotating, Teeth at front contact
+		MS_ROTATING_FRONT     = 144, //Motor rotating, Teeth at front contact
+		MS_NOT_ROTATING_REAR  = 160, //Motor not rotating, Teeth at rear contact
+		MS_ROTATING_REAR      = 176, //Motor rotating, Teeth at rear contact
+		MS_NOT_INITIALIZED    = 200  //Motor not initialized
+	};
 }

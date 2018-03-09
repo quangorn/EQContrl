@@ -4,4 +4,5 @@
 
 #pragma once
 
-
+#include <math.h>
+#include <Windows.h>

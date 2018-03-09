@@ -114,17 +114,18 @@ namespace AstroMountConfigurator
                         {
                             Thread.Sleep(2000);
                             date = DateTime.Now;
-                            int x = 0, y = 0;
+                            int x = 0, y = 0, motorSteps = 0;
                             double angle = 0;
                             for (int i = 0; true; i++)
                             {
-                                var status = Connector.GetEncoderValues(ref x, ref y, ref angle);
+                                var status = Connector.GetEncoderValues(ref x, ref y, ref motorSteps, ref angle);
                                 if (status != Status.OK)
                                 {
                                     //this.StatusText.Text = $"Get encoder values error: {status}";
                                     return;
                                 }                                
-                                file.WriteLine(String.Format("{0};{1};{2};{3:0.00};", DateTime.Now.Subtract(date).Ticks, x, y, angle));
+                                file.WriteLine(String.Format("{0};{1};{2};{3};{4:0.00};", 
+                                    DateTime.Now.Subtract(date).Ticks, x, y, motorSteps, angle));
                                 Thread.Sleep(10);
                             }
                         }
