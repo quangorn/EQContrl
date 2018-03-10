@@ -28,7 +28,7 @@ inline std::string currentDateTime() {
 { \
 	static std::ofstream fout; \
 	fout.open(LOG_FILE, std::ios_base::app); \
-	fout << currentDateTime() << args << std::endl; \
+	fout << currentDateTime() << GetCurrentThreadId() << "\t" << args << std::endl; \
 	fout.close(); \
 }
 
