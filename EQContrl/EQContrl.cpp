@@ -140,10 +140,11 @@ En_Status GetEncoderValues(int& x, int& y, int& motorSteps, double& angle) {
 	En_Status nStatus = SendAndReadResp(EqGetMotorValuesReq(MI_RA), Resp);
 	if (nStatus == STS_OK) {
 		motorSteps = Resp.m_nMicrostepCount;
-		angle = m_AngleCalculator.CalculateAngle(Resp.m_nEncoderValueX, Resp.m_nEncoderValueY);
 		x = Resp.m_nEncoderValueX;
 		y = Resp.m_nEncoderValueY;
-
+		angle = m_AngleCalculator.CalculateAngle(Resp.m_nMicrostepCount, Resp.m_nMicrostepCount % WormMicrostepCount(MI_RA),
+			Resp.m_nEncoderValueX, Resp.m_nEncoderValueY);
+		
 		//TODO: remove (no sensor testing only)
 		/*int nWormMicrosteps = WormMicrostepCount(MI_RA);
 		double steps = (double)(Resp.m_nMicrostepCount % nWormMicrosteps) / nWormMicrosteps * 2 * M_PI - M_PI;
@@ -442,7 +443,8 @@ EQCONTRL_API DWORD __stdcall EQ_GetMotorValues(DWORD motor_id) {
 	else {
 		ret = Resp.m_nMicrostepCount >= 0x1000000 ? Resp.m_nMicrostepCount % TotalMicrostepCount(motor_id) : Resp.m_nMicrostepCount;
 		if (motor_id == MI_RA) {
-			m_AngleCalculator.CalculateAngle(Resp.m_nEncoderValueX, Resp.m_nEncoderValueY);
+			m_AngleCalculator.CalculateAngle(Resp.m_nMicrostepCount, Resp.m_nMicrostepCount % WormMicrostepCount(MI_RA),
+				Resp.m_nEncoderValueX, Resp.m_nEncoderValueY);
 		}
 	}
 	LOG("EQ_GetMotorValues() return:" << ret << "; Real Count: " << Resp.m_nMicrostepCount);

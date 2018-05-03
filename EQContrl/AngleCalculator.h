@@ -22,7 +22,7 @@ public:
 	/*
 	Returns angle 0 - 360 
 	*/
-	double CalculateAngle(int16_t nValueX, int16_t nValueY);
+	double CalculateAngle(uint32_t nMicrostepCount, uint32_t nWormCount, int16_t nValueX, int16_t nValueY);
 
 private:
 	void InitRangeAndOffset();
@@ -43,6 +43,7 @@ public:
 	double m_nOffsetX;
 	double m_nOffsetY;
 	double m_nLastAngle;
+	SYSTEMTIME m_nLastCdrWriteTime;
 
 	double m_CorrectionData[m_nSize];
 	int m_nLastCorrectionPos;

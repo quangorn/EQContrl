@@ -8,7 +8,16 @@
 
 
 #define LOG_FILE "C:\\out.log"
-#define CDR_FILE "C:\\cdr.txt"
+//#define CDR_FILE "C:\\cdr.txt"
+#define CDR_DIR "C:\\Astromount"
+
+inline std::string cdrFileName() {
+	static char buf[80];
+	SYSTEMTIME t;
+	GetLocalTime(&t);
+	sprintf_s(buf, CDR_DIR "\\%04d_%02d_%02d.log", t.wYear, t.wMonth, t.wDay);
+	return buf;
+}
 
 inline std::string currentDateTime() {
 	//time_t     now = time(0);
@@ -20,7 +29,7 @@ inline std::string currentDateTime() {
 
 	SYSTEMTIME t;
 	GetLocalTime(&t);
-	sprintf_s(buf, "[%02d:%02d:%02d.%03d]\t", t.wHour, t.wMinute, t.wSecond, t.wMilliseconds);
+	sprintf_s(buf, "%02d:%02d:%02d.%03d", t.wHour, t.wMinute, t.wSecond, t.wMilliseconds);
 	return buf;
 }
 
@@ -28,14 +37,14 @@ inline std::string currentDateTime() {
 { \
 	static std::ofstream fout; \
 	fout.open(LOG_FILE, std::ios_base::app); \
-	fout << currentDateTime() << GetCurrentThreadId() << "\t" << args << std::endl; \
+	fout << "[" << currentDateTime() << "]\t" << GetCurrentThreadId() << "\t" << args << std::endl; \
 	fout.close(); \
 }
 
-#define CDR(args)// \
+#define CDR(args) \
 { \
 	static std::ofstream fout; \
-	fout.open(CDR_FILE, std::ios_base::app); \
-	fout << args << std::endl; \
+	fout.open(cdrFileName(), std::ios_base::app); \
+	fout << currentDateTime() << ";" << args << std::endl; \
 	fout.close(); \
 }

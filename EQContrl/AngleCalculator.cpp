@@ -5,6 +5,7 @@ void AngleCalculator::Init(int16_t nMinX, int16_t nMaxX, int16_t nMinY, int16_t 
 	if (nMinX == -1 && nMaxX == -1 && nMinY == -1 && nMaxY == -1) {
 		return;
 	}
+	CreateDirectoryA(CDR_DIR, NULL);
 	m_lIsInited = true;
 	m_nMinX = nMinX;
 	m_nMaxX = nMaxX;
@@ -25,39 +26,44 @@ void AngleCalculator::InitRangeAndOffset() {
 	m_nOffsetY = (double)(m_nMaxY + m_nMinY) / 2;
 }
 
-double AngleCalculator::CalculateAngle(int16_t nValueX, int16_t nValueY) {
+double AngleCalculator::CalculateAngle(uint32_t nMicrostepCount, uint32_t nWormCount, int16_t nValueX, int16_t nValueY) {
 	if (!m_lIsInited) {
 		return 0;
 	}
 
-	//In case of sensor disconnect
-	if ((nValueX == 0 && nValueY == 0) ||
-		(nValueX == -1 && nValueY == -1)) {
-		CDR(nValueX << ";" << nValueY << ";Error;");
-		return m_nLastAngle;
+	bool lConnected = false;
+	//Ensure sensor not disconnected
+	if ((nValueX != 0 || nValueY != 0) && (nValueX != -1 || nValueY != -1)) {
+		/*if (nValueX < m_nMinX) {
+			m_nMinX = nValueX;
+			InitRangeAndOffset();
+		} else if (nValueX > m_nMaxX) {
+			m_nMaxX = nValueX;
+			InitRangeAndOffset();
+		}
+		if (nValueY < m_nMinY) {
+			m_nMinY = nValueY;
+			InitRangeAndOffset();
+		}
+		else if (nValueY > m_nMaxY) {
+			m_nMaxY = nValueY;
+			InitRangeAndOffset();
+		}*/
+
+		lConnected = true;
+		double x = (nValueX - m_nOffsetX) / m_nRangeX;
+		double y = (nValueY - m_nOffsetY) / m_nRangeY;
+		double radAngle = std::atan2(y > -1 ? (y < 1 ? y : 1) : -1, x > -1 ? (x < 1 ? x : 1) : -1);
+		m_nLastAngle = CorrectAngle(radAngle);
 	}
 	
-	/*if (nValueX < m_nMinX) {
-		m_nMinX = nValueX;
-		InitRangeAndOffset();
-	} else if (nValueX > m_nMaxX) {
-		m_nMaxX = nValueX;
-		InitRangeAndOffset();
+	SYSTEMTIME t;
+	GetLocalTime(&t);
+	if (t.wSecond != m_nLastCdrWriteTime.wSecond) {
+		m_nLastCdrWriteTime = t;
+		CDR(nMicrostepCount << ";" << nWormCount << ";" << nValueX << ";" << nValueY << ";" << m_nLastAngle
+			<< (lConnected ? ";" : ";Error;"));
 	}
-	if (nValueY < m_nMinY) {
-		m_nMinY = nValueY;
-		InitRangeAndOffset();
-	}
-	else if (nValueY > m_nMaxY) {
-		m_nMaxY = nValueY;
-		InitRangeAndOffset();
-	}*/
-
-	double x = (nValueX - m_nOffsetX) / m_nRangeX;
-	double y = (nValueY - m_nOffsetY) / m_nRangeY;
-	double radAngle = std::atan2(y > -1 ? (y < 1 ? y : 1) : -1, x > -1 ? (x < 1 ? x : 1) : -1);
-	m_nLastAngle = CorrectAngle(radAngle);
-	CDR(nValueX << ";" << nValueY << ";" << m_nLastAngle << ";");
 	return m_nLastAngle;
 }
 
