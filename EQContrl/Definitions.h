@@ -1,6 +1,6 @@
 #pragma once
 
-#define MCU_TIMER_FREQ 36000000
+#define MCU_TIMER_FREQ 72000000
 
 #define USB_HID_VID 1155
 #define USB_HID_PID 22355

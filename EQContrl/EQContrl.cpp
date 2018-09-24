@@ -23,9 +23,8 @@ static AngleCalculator m_AngleCalculator;
 static Config m_Config;
 
 uint32_t WormMicrostepCount(int nMotorId, const Config& config) {
-	return (uint32_t)config.m_AxisConfigs[nMotorId].m_nMicrostepCount *
-		config.m_AxisConfigs[nMotorId].m_nStepsPerWormTurn /
-		(config.m_AxisConfigs[nMotorId].m_nMicrostepsDivider / 2);
+	return ((uint32_t)config.m_AxisConfigs[nMotorId].m_nMicrostepCount * config.m_AxisConfigs[nMotorId].m_nStepsPerWormTurn) >> 
+		config.m_AxisConfigs[nMotorId].m_nMicrostepsDivider;
 }
 
 uint32_t WormMicrostepCount(int nMotorId) {
@@ -114,9 +113,9 @@ En_Status ReadConfig(Config& config) {
 En_Status WriteConfig(const Config& config) {
 	Config modConfig = config;
 	for (int i = EQ::MI_RA; i <= EQ::MI_DEC; i++) {
-		modConfig.m_AxisConfigs[i].m_nMicrostepsDivider = 2;
+		modConfig.m_AxisConfigs[i].m_nMicrostepsDivider = 0;
 		while (TotalMicrostepCount(i, modConfig) >= 0x1000000) {
-			modConfig.m_AxisConfigs[i].m_nMicrostepsDivider *= 2;
+			modConfig.m_AxisConfigs[i].m_nMicrostepsDivider++;
 		}
 
 		m_RateCalculator.CalculatePrescalersFromRate(
