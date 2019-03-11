@@ -5,10 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AstroMountConfigurator"
         mc:Ignorable="d"
-        Title="AstroMountConfigurator" Height="525" Width="525">
+        Title="AstroMountConfigurator" Height="600" Width="700"
+        Style="{StaticResource MyStyle}">
     <Border Padding="10">
         <StackPanel>
-            <TabControl SelectedIndex="2">
+            <TabControl SelectedIndex="0">
                 <TabItem Header="{DynamicResource m_Configuration}">
                     <StackPanel>
                         <Grid>
