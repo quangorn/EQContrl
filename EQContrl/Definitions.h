@@ -8,9 +8,11 @@
 
 #define EQMOD_TRACK_FACTOR 0x1000000
 
+#define FLASH_PAGE_SIZE 1024
 #define USB_FLASH_PAGE_SIZE 60 //USB_DATA_SIZE - (size + cmd + page_num), and must be even (flash can be written only in 2 bytes)
 #define ENCODER_CORRECTION_PAGES_COUNT 12
 #define ENCODER_CORRECTION_DATA_SIZE ((USB_FLASH_PAGE_SIZE * ENCODER_CORRECTION_PAGES_COUNT) / sizeof(int16_t) - 4 /* size of min-max values */)
+#define PEC_DATA_MAX_SIZE ((FLASH_PAGE_SIZE - sizeof(int32_t) /* size of multiplier */ - sizeof(int16_t) /* size of PEC size */) / sizeof(int16_t))
 
 namespace EQ {
 
