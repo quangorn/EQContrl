@@ -1,0 +1,12 @@
+.vs
+Debug
+Release
+EQContrl/Debug
+EQContrl/Release
+ipch
+.*\.sdf$
+.*\.db$
+AstroMountConfigurator/obj
+AstroMountConfigurator/bin
+WrapperLibrary/Debug
+WrapperLibrary/Release
