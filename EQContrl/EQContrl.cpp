@@ -120,6 +120,7 @@ En_Status WriteConfig(const Config& config) {
 
 		m_RateCalculator.CalculatePrescalersFromRate(
 			TotalMicrostepCount(i, modConfig),
+			modConfig.m_AxisConfigs[i].m_nMicrostepsDivider,
 			m_RateCalculator.GetRate(TR_SIDEREAL),
 			modConfig.m_AxisConfigs[i].m_nSiderealPeriod,
 			modConfig.m_AxisConfigs[i].m_nSiderealPsc
@@ -566,7 +567,12 @@ EQCONTRL_API DWORD __stdcall EQ_StartRATrack(DWORD trackrate, DWORD hemisphere, 
 	DWORD ret = 0;
 	double fRate = m_RateCalculator.GetRate((En_TrackRate)trackrate);
 	uint16_t nFirst, nSecond;
-	if (m_RateCalculator.CalculatePrescalersFromRate(TotalMicrostepCount(EQ::MI_RA), fRate, nFirst, nSecond)) {
+	if (m_RateCalculator.CalculatePrescalersFromRate(
+			TotalMicrostepCount(EQ::MI_RA), 
+			m_Config.m_AxisConfigs[EQ::MI_RA].m_nMicrostepsDivider, 
+			fRate, 
+			nFirst, 
+			nSecond)) {
 		LOG("Rate: " << fRate << "; " << nFirst * nSecond <<
 			" = " << nFirst << " * " << nSecond);
 		ret = Convert(SendAndReadResp(
@@ -653,7 +659,12 @@ EQCONTRL_API DWORD __stdcall EQ_SetCustomTrackRate(DWORD motor_id, DWORD trackmo
 	double fRate = (m_RateCalculator.GetRate(TR_SIDEREAL) * EQMOD_TRACK_FACTOR) / (trackoffset - 30000);
 	uint16_t nFirst, nSecond;
 	En_MotorId nMotorId = (En_MotorId)motor_id;
-	if (m_RateCalculator.CalculatePrescalersFromRate(TotalMicrostepCount(nMotorId), fRate, nFirst, nSecond)) {
+	if (m_RateCalculator.CalculatePrescalersFromRate(
+			TotalMicrostepCount(nMotorId), 
+			m_Config.m_AxisConfigs[nMotorId].m_nMicrostepsDivider, 
+			fRate, 
+			nFirst, 
+			nSecond)) {
 		LOG("Rate: " << fRate << "; " << nFirst * nSecond <<
 			" = " << nFirst << " * " << nSecond);
 		ret = Convert(SendAndReadResp(
@@ -727,7 +738,12 @@ EQCONTRL_API DWORD __stdcall EQ_SendGuideRate(DWORD motor_id, DWORD trackrate, D
 		nDirection = guidedir ? DIR_FORWARD : DIR_REVERSE; //Странно что не наоборот, возможно перепутали в EQMOD
 	}
 	uint16_t nFirst, nSecond;
-	if (m_RateCalculator.CalculatePrescalersFromRate(TotalMicrostepCount(nMotorId), fRate, nFirst, nSecond)) {
+	if (m_RateCalculator.CalculatePrescalersFromRate(
+			TotalMicrostepCount(nMotorId), 
+			m_Config.m_AxisConfigs[nMotorId].m_nMicrostepsDivider, 
+			fRate, 
+			nFirst, 
+			nSecond)) {
 		LOG("Rate: " << fRate << "; " << nFirst * nSecond <<
 			" = " << nFirst << " * " << nSecond);
 		ret = Convert(SendAndReadResp(

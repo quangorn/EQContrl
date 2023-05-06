@@ -7,7 +7,7 @@
 #include <sstream>
 
 
-#define LOG_FILE "C:\\out.log"
+#define LOG_FILE "C:\\Astromount\\out.log"
 //#define CDR_FILE "C:\\cdr.txt"
 #define CDR_DIR "C:\\Astromount"
 
@@ -33,7 +33,7 @@ inline std::string currentDateTime() {
 	return buf;
 }
 
-#define LOG(args)// \
+#define LOG(args) //\
 { \
 	static std::ofstream fout; \
 	fout.open(LOG_FILE, std::ios_base::app); \

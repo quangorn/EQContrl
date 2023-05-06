@@ -25,11 +25,12 @@ double RateCalculator::GetRate(EQ::En_TrackRate nTrackRate) const {
 	return 0;
 }
 
-bool RateCalculator::CalculatePrescalersFromRate(uint32_t nTotalMicrostepCount, double fRate, uint16_t &nFirst, uint16_t &nSecond) const {
+bool RateCalculator::CalculatePrescalersFromRate(uint32_t nTotalMicrostepCount, uint16_t nMicrostepsDivider, double fRate, 
+		uint16_t &nFirst, uint16_t &nSecond) const {
 	if (!fRate)
 		return false;
 	double fPrescaler = ((double)MCU_TIMER_FREQ * (double)ARCSEC_TOTAL_COUNT) /
-		(fRate * nTotalMicrostepCount);
+		(fRate * ((uint64_t)nTotalMicrostepCount << nMicrostepsDivider));
 	return m_Factorizator.FactorizeFloatInTwoDivisors(fPrescaler, nFirst, nSecond);
 }
 
